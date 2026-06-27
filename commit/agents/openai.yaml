@@ -1,0 +1,4 @@
+interface:
+  display_name: "Commit"
+  short_description: "Create clean logical git commits"
+  default_prompt: "Use $commit to analyze my current git changes and commit them with clean logical grouping."
