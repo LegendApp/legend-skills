@@ -1,0 +1,4 @@
+interface:
+  display_name: "React Coding Style"
+  short_description: "React style and performance guidance"
+  default_prompt: "Use $react-coding-style to implement this React or TypeScript UI change with small render surfaces and stable identities."
