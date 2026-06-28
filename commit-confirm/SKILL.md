@@ -1,20 +1,21 @@
 ---
-name: commit
-description: Commit git working tree changes with clean logical grouping and repository commit-message conventions. Use when the user asks to commit changes, make a commit, commit all changes, split changes into commits, propose commit messages, or wait for "go" before committing.
+name: commit-confirm
+description: Propose git commit groups and messages, then wait for explicit approval before committing. Use when the user asks to commit with confirmation, review commits first, propose commits, wait for "go", or ask before committing.
 ---
 
-# Commit
+# Commit Confirm
 
-Use this skill to turn current git changes into one or more clean commits.
+Use this skill to turn current git changes into one or more clean commits, but always get approval before staging or committing.
 
-Maintenance note: keep this skill aligned with `commit-confirm`; only the approval mode should differ.
+Maintenance note: keep this skill aligned with `commit`; only the approval mode should differ.
 
-## Approval Modes
+## Approval Mode
 
-- **Direct mode**: If the user asks to commit, analyze the working tree and create the needed commit or commits without asking for a separate "go".
-- **Plan mode**: If the user asks for a plan, asks to review commits first, says to wait, says to prompt or ask before committing, or otherwise requests approval first, present a commit plan and wait for explicit approval such as `go` before staging or committing. After approval, create all agreed commits without asking again unless the working tree changes unexpectedly.
-- **Clarification stop**: In any mode, stop before committing if mixed hunks cannot be staged safely, repository guidance conflicts with the user's request, or the intended grouping is ambiguous enough that committing would risk losing user intent.
-- **Approval response**: If a previous turn presented a commit plan and the user now says `go`, treat that as approval for that plan. Re-check the working tree before staging.
+- Always present a commit plan first and wait for explicit approval such as `go`.
+- Do not stage or commit before approval, even if there is only one logical commit.
+- After approval, create all agreed commits without asking again unless the working tree changes unexpectedly.
+- If a previous turn presented a commit plan and the user now says `go`, treat that as approval for that plan. Re-check the working tree before staging.
+- Stop before committing if mixed hunks cannot be staged safely, repository guidance conflicts with the user's request, or the intended grouping is ambiguous enough that committing would risk losing user intent.
 
 ## Inspect
 
@@ -44,7 +45,7 @@ Good:
 
 ```text
 fix: preserve scroll offset after prepend
-feat: add commit planning skill
+feat: add commit confirmation skill
 docs: document skills install flow
 ```
 
@@ -60,7 +61,7 @@ Use a body for behavioral changes when the reason, invariant, or validation woul
 
 ## Plan Output
 
-When plan mode is active, present:
+Present:
 
 ```text
 Proposed commits (N):
@@ -71,11 +72,9 @@ Proposed commits (N):
 
 Then ask for `go` or edits. Do not stage or commit until the user approves.
 
-In direct mode, do this planning internally. Only show a concise summary before or while committing if it helps the user follow a multi-commit split.
-
 ## Commit
 
-For each group:
+For each approved group:
 
 1. Stage only that group using path-limited or hunk-limited staging.
 2. Verify the staged diff matches the intended group with `git diff --staged --stat` and targeted `git diff --staged`.
