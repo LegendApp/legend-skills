@@ -1,0 +1,4 @@
+interface:
+  display_name: "Git Conflict Resolver"
+  short_description: "Run and continue git integration safely"
+  default_prompt: "Use $git-conflicts to detect any active Git rebase, merge, cherry-pick, or revert, then run or continue the requested operation while resolving straightforward conflicts safely."
