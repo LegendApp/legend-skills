@@ -56,6 +56,7 @@ Avoid unnecessary full-data work.
 - If data is effectively index-addressed, avoid handing the list a fully materialized huge array when a bounded or estimated access path can work.
 - Treat repeated `keyExtractor` calls as a signal to inspect both layout/index passes and structural data-change checks.
 - Provide stable `keyExtractor`, `getItemType`, and `getFixedItemSize` when they match the data. Keep these callbacks cheap and identity-stable.
+- Prefer list-owned reset props such as `dataKey` when changing data identity should reset internal list state without remounting the list or its ancestors. Avoid `key={...}` on `LegendList` or parent containers solely to force a reset; it remounts the visible row subtree and repeats mount work.
 - For uniform fixed rows, align wrapper height, `getFixedItemSize`, and visual row layout.
 - Do not chase row-render micro-optimizations when pre-render bookkeeping is the proven bottleneck.
 
@@ -64,12 +65,16 @@ Avoid unnecessary full-data work.
 Keep `renderItem` stable in hot lists.
 
 - Avoid `useCallback` patterns where `renderItem` depends on frequently changing state such as selection, expansion, hover, input text, scroll mode, or transient filters.
-- Prefer a stable `renderItem` that passes item identity and static props to a memoized or observed row component. Let the row read volatile state through the smallest local selector, observable read, context selector, or explicit prop boundary that should actually re-render that row.
+- Prefer a stable `renderItem` that passes item identity and static props to a memoized or observed row component. Let the row read volatile state through the narrowest boundary the app already supports, such as row-local state, an existing fine-grained store selector, an observable read, or an explicit row prop that should actually re-render that row.
+- Treat `extraData` as an explicit broad row invalidation contract. It re-renders item components when it changes, so keep it minimal and stable. Use it for rare global row refreshes or values that intentionally affect most visible rows, not for frequent per-row state such as selection, hover, search highlights, or transient input when a narrower update path exists.
+- If the app has no row-level subscription primitive, do not introduce a state library solely to avoid `extraData`. First try to localize the state inside the row, split expensive children behind memoized props, pass stable callbacks that read current values at event time, or update item identity only for the rows that actually changed.
+- When a broad invalidation or other performance-costly compromise remains necessary, call it out prominently, explain why it is being used, and suggest the cleaner path, such as adding a fine-grained row subscription/store boundary or changing data ownership so only affected rows update.
+- Do not replace `extraData` with ordinary React context unless the context value is stable and exposes a selector/subscription API. Reading a changing context value in every row usually has the same broad re-render shape as `extraData`.
+- When a stable `renderItem` reads changing values through latest refs or stable callbacks, verify how rows are supposed to update. Latest refs can keep callback identity stable, but they do not refresh rendered row output by themselves.
 - Use a local `useStableCallback` or latest-ref helper when callbacks created around the list need current state without changing `renderItem` identity.
 - Keep `useCallback` for `renderItem` only when the dependency list is small and changes rarely, or when the callback intentionally must change with those dependencies.
 - When auditing, always inspect the row component returned by `renderItem`; `item` in callback deps inside that row can be as costly as an unstable `renderItem`, especially for gesture/native children.
 - In row components, treat `item`, `item.id`, or other per-row values in large dependency arrays as a signal to inspect ownership. Pure row derivations can depend on the row value, but event handlers should usually receive the current item or id at the event site, read through a stable ref, or use a stable callback so row-local callbacks are not recreated just because row props refreshed.
-- Do not introduce an external state library solely to stabilize `renderItem`; use external or observable state when the app already needs shared, field-level row subscriptions.
 - If rows still remount while `renderItem` is stable, inspect inline component declarations, changing `key` props, conditional root component types, and wrappers that replace the returned subtree.
 
 ## Hot Row Component Audit
