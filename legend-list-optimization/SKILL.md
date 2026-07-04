@@ -65,9 +65,23 @@ Keep `renderItem` stable in hot lists.
 - Prefer a stable `renderItem` that passes item identity and static props to a memoized or observed row component. Let the row read volatile state through the smallest local selector, observable read, context selector, or explicit prop boundary that should actually re-render that row.
 - Use a local `useStableCallback` or latest-ref helper when callbacks created around the list need current state without changing `renderItem` identity.
 - Keep `useCallback` for `renderItem` only when the dependency list is small and changes rarely, or when the callback intentionally must change with those dependencies.
+- When auditing, always inspect the row component returned by `renderItem`; `item` in callback deps inside that row can be as costly as an unstable `renderItem`, especially for gesture/native children.
 - In row components, treat `item`, `item.id`, or other per-row values in large dependency arrays as a signal to inspect ownership. Pure row derivations can depend on the row value, but event handlers should usually receive the current item or id at the event site, read through a stable ref, or use a stable callback so row-local callbacks are not recreated just because row props refreshed.
 - Do not introduce an external state library solely to stabilize `renderItem`; use external or observable state when the app already needs shared, field-level row subscriptions.
 - If rows still remount while `renderItem` is stable, inspect inline component declarations, changing `key` props, conditional root component types, and wrappers that replace the returned subtree.
+
+## Hot Row Component Audit
+
+A stable `renderItem` is not sufficient. In audit mode, follow the component returned by `renderItem` and inspect the hot row component itself.
+
+For each hot row component:
+
+- Search for `useCallback`, `useMemo`, inline component declarations, custom memo comparators, and handlers passed to gesture, press, media, layout, animation, or native-backed children.
+- Treat `item`, `item.data`, `item.id`, `index`, `message`, `row`, or derived row objects in dependency arrays as a performance warning when the callback identity is passed below the row.
+- Rank this higher when the changing callback or object flows into heavy components or APIs that do meaningful setup, subscription, layout, media, native, or gesture work. The issue is not the dependency array by itself; it is large churn caused by unstable identities reaching expensive children such as `react-native-gesture-handler` components, pressables, Reanimated/worklet boundaries, image/video/media renderers, context menus, layout callbacks, or recycler-sensitive wrappers.
+- Prefer stable event callbacks (`useEvent`, latest-ref, or local stable-callback helpers) when the handler needs current row data but its identity should not change.
+- Pure row derivations may depend on `item`; the problem is unstable identities passed to children that do meaningful setup or subscription work.
+- Do not stop after proving `renderItem` is stable. Row-local callback churn can still dominate scroll cost.
 
 ## Measurement And Caches
 
