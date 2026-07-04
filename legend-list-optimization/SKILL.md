@@ -1,6 +1,6 @@
 ---
 name: legend-list-optimization
-description: Optimize and debug Legend List usage in React, React Native, and web apps. Use when working with @legendapp/list, LegendList, virtualization, scroll blanking, mount cost, row measurement, maintainVisibleContentPosition, adaptive rendering, drawDistance, fixed-size rows, visible range callbacks, keyExtractor/getItemType/getFixedItemSize behavior, or list-related performance regressions.
+description: Optimize, audit, and debug Legend List usage in React, React Native, and web apps. Use when working with @legendapp/list, LegendList, virtualization, scroll blanking, mount cost, row measurement, renderItem stability, maintainVisibleContentPosition, adaptive rendering, drawDistance, fixed-size rows, visible range callbacks, keyExtractor/getItemType/getFixedItemSize behavior, or list-related performance regressions.
 ---
 
 # Legend List Optimization
@@ -10,6 +10,13 @@ description: Optimize and debug Legend List usage in React, React Native, and we
 Use this skill for Legend List-specific invariants and remedies. For unclear bugs, regressions, logging, browser/app automation, or measurement strategy, use `diagnose` for the core loop first, then apply this skill to interpret list behavior.
 
 Optimize Legend List by separating viewport work, buffered work, measurement work, and app row rendering. Do not assume `renderItem` is the bottleneck until mount, range calculation, data materialization, and row commit costs are separated.
+
+Use one of two modes:
+
+- **Audit mode**: when the user asks whether a list can be improved, inspect the existing list and row boundaries, rank concrete opportunities by impact and confidence, and distinguish measured problems from design risks.
+- **Implementation mode**: when the user asks for a fix, apply the smallest change that moves volatile work out of hot list props or improves the proven list bottleneck, then validate with focused evidence.
+
+Do not split analysis and implementation into separate mental models. The audit should recommend the same shapes you would be willing to implement.
 
 ## Diagnosis Order
 
@@ -49,6 +56,18 @@ Avoid unnecessary full-data work.
 - Provide stable `keyExtractor`, `getItemType`, and `getFixedItemSize` when they match the data. Keep these callbacks cheap and identity-stable.
 - For uniform fixed rows, align wrapper height, `getFixedItemSize`, and visual row layout.
 - Do not chase row-render micro-optimizations when pre-render bookkeeping is the proven bottleneck.
+
+## renderItem Stability
+
+Keep `renderItem` stable in hot lists.
+
+- Avoid `useCallback` patterns where `renderItem` depends on frequently changing state such as selection, expansion, hover, input text, scroll mode, or transient filters.
+- Prefer a stable `renderItem` that passes item identity and static props to a memoized or observed row component. Let the row read volatile state through the smallest local selector, observable read, context selector, or explicit prop boundary that should actually re-render that row.
+- Use a local `useStableCallback` or latest-ref helper when callbacks created around the list need current state without changing `renderItem` identity.
+- Keep `useCallback` for `renderItem` only when the dependency list is small and changes rarely, or when the callback intentionally must change with those dependencies.
+- In row components, treat `item`, `item.id`, or other per-row values in large dependency arrays as a signal to inspect ownership. Pure row derivations can depend on the row value, but event handlers should usually receive the current item or id at the event site, read through a stable ref, or use a stable callback so row-local callbacks are not recreated just because row props refreshed.
+- Do not introduce an external state library solely to stabilize `renderItem`; use external or observable state when the app already needs shared, field-level row subscriptions.
+- If rows still remount while `renderItem` is stable, inspect inline component declarations, changing `key` props, conditional root component types, and wrappers that replace the returned subtree.
 
 ## Measurement And Caches
 
