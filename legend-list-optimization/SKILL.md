@@ -11,10 +11,12 @@ Use this skill for Legend List-specific invariants and remedies. For unclear bug
 
 Optimize Legend List by separating viewport work, buffered work, measurement work, and app row rendering. Do not assume `renderItem` is the bottleneck until mount, range calculation, data materialization, and row commit costs are separated.
 
+When any implementation touches `LegendList`, `@legendapp/list`, list virtualization, list rows, list measurement, scroll behavior, or related props, apply this skill's audit checks to the affected list even if the user did not name the skill explicitly.
+
 Use one of two modes:
 
 - **Audit mode**: when the user asks whether a list can be improved, inspect the existing list and row boundaries, rank concrete opportunities by impact and confidence, and distinguish measured problems from design risks.
-- **Implementation mode**: when the user asks for a fix, apply the smallest change that moves volatile work out of hot list props or improves the proven list bottleneck, then validate with focused evidence.
+- **Implementation mode**: when the user asks for a fix, first run the same audit as audit mode, state a ranked implementation plan, and stop for explicit approval such as `go`. After approval, implement the high-confidence fixes in narrow reviewable slices, then validate with focused evidence.
 
 Do not split analysis and implementation into separate mental models. The audit should recommend the same shapes you would be willing to implement.
 
