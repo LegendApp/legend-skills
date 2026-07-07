@@ -24,7 +24,7 @@ If package metadata is insufficient, inspect config files such as `vite.config.*
 1. **Existing repo test tooling**: prefer existing Playwright, Cypress, Vitest browser mode, Storybook tests, or Testing Library coverage when it can reproduce the bug. This gives the best regression path.
 2. **Host-provided browser automation**: use the browser tools exposed by the current agent environment for live localhost inspection, DOM state, user interactions, screenshots, console errors, and network evidence.
 3. **Playwright**: use as the generic public fallback for deterministic browser repro scripts/tests when no repo tooling exists.
-4. **agent-device web**: use when the browser flow must be replayable alongside mobile/device flows, recorded, captured as CLI evidence, or used in a unified cross-platform workflow.
+4. **agent-device web**: use when the browser flow must be replayable alongside mobile/device flows, recorded, captured as CLI evidence, or used in a unified cross-platform workflow. When using agent-device web, follow the agent-device install and update rules in [app-device.md](app-device.md).
 5. **Raw CDP, Puppeteer, or React DevTools**: use when the bug requires low-level runtime evaluation, performance tracing, heap inspection, React render profiling, or when existing tools expose that route directly.
 
 Before using a non-repo tool, detect it:

@@ -4,6 +4,8 @@ Use this reference for live app evidence on mobile, device, desktop, TV, or Reac
 
 These adapters are optional helpers. If neither is installed, continue with tests, logs, browser tooling, command-line repros, or user-provided artifacts where possible.
 
+For React Native live app testing, do not silently fall back when the preferred adapter is missing. Prompt the user to install the relevant adapter, provide the exact install command, and wait for the user to install it or approve the install before continuing with live device/simulator testing.
+
 ## Detect Tools
 
 Check availability before suggesting installation:
@@ -14,6 +16,20 @@ command -v agent-device
 ```
 
 Do not silently install tools. If a preferred adapter is missing, suggest the relevant command and wait for the user to install or approve.
+
+When using Argent or agent-device, check whether the installed tool is behind the npm latest version:
+
+```bash
+argent --version
+npm view @swmansion/argent version
+agent-device --version
+npm view agent-device version
+```
+
+If an update is available for a tool used during the turn, end the turn by suggesting the update and provide both options:
+
+- the exact update command
+- that the user can reply `update` to have the agent run it
 
 ## Defaults
 
@@ -47,14 +63,20 @@ argent tools
 If Argent is not installed, suggest:
 
 ```bash
-npx @swmansion/argent init
+npx @swmansion/argent init -y
 ```
 
 or:
 
 ```bash
-npm install -g @swmansion/argent
-argent init
+npm install -g @swmansion/argent@latest
+argent init -y
+```
+
+If Argent was used and a newer npm version is available, end the turn with:
+
+```bash
+npm install -g @swmansion/argent@latest && argent init -y
 ```
 
 ## agent-device
@@ -82,6 +104,12 @@ If agent-device is not installed, suggest:
 ```bash
 npm install -g agent-device@latest
 agent-device help workflow
+```
+
+If agent-device was used and a newer npm version is available, end the turn with:
+
+```bash
+npm install -g agent-device@latest
 ```
 
 ## Tool Choice Notes
