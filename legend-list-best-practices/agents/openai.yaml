@@ -1,0 +1,4 @@
+interface:
+  display_name: "Legend List Best Practices"
+  short_description: "Use Legend List with stable list boundaries"
+  default_prompt: "Use $legend-list-best-practices to audit this LegendList implementation for correct virtualization, measurement, and row rendering patterns."

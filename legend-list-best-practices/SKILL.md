@@ -1,15 +1,15 @@
 ---
-name: legend-list-optimization
-description: Optimize, audit, and debug Legend List usage in React, React Native, and web apps. Use when working with @legendapp/list, LegendList, virtualization, scroll blanking, mount cost, row measurement, renderItem stability, maintainVisibleContentPosition, adaptive rendering, drawDistance, fixed-size rows, visible range callbacks, keyExtractor/getItemType/getFixedItemSize behavior, or list-related performance regressions.
+name: legend-list-best-practices
+description: Use Legend List and @legendapp/list correctly in React, React Native, and web apps. Use when working with LegendList, virtualization, scroll blanking, mount cost, row measurement, renderItem stability, maintainVisibleContentPosition, adaptive rendering, drawDistance, fixed-size rows, visible range callbacks, keyExtractor/getItemType/getFixedItemSize behavior, list implementation reviews, or list-related performance regressions.
 ---
 
-# Legend List Optimization
+# Legend List Best Practices
 
 ## Overview
 
-Use this skill for Legend List-specific invariants and remedies. For unclear bugs, regressions, logging, browser/app automation, or measurement strategy, use `diagnose` for the core loop first, then apply this skill to interpret list behavior.
+Use this skill for Legend List-specific invariants, implementation patterns, audit checks, and remedies. For unclear bugs, regressions, logging, browser/app automation, or measurement strategy, use `diagnose` for the core loop first, then apply this skill to interpret list behavior.
 
-Optimize Legend List by separating viewport work, buffered work, measurement work, and app row rendering. Do not assume `renderItem` is the bottleneck until mount, range calculation, data materialization, and row commit costs are separated.
+Use Legend List by separating viewport work, buffered work, measurement work, and app row rendering. Do not assume `renderItem` is the bottleneck until mount, range calculation, data materialization, and row commit costs are separated.
 
 When any implementation touches `LegendList`, `@legendapp/list`, list virtualization, list rows, list measurement, scroll behavior, or related props, apply this skill's audit checks to the affected list even if the user did not name the skill explicitly.
 

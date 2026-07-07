@@ -1,4 +1,0 @@
-interface:
-  display_name: "Legend State Optimization"
-  short_description: "Use Legend State with narrow reactive boundaries"
-  default_prompt: "Use $legend-state-optimization to refactor this React state flow with minimal re-renders."

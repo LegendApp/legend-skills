@@ -1,0 +1,4 @@
+interface:
+  display_name: "Legend State Best Practices"
+  short_description: "Use Legend State with narrow reactive boundaries"
+  default_prompt: "Use $legend-state-best-practices to refactor this React state flow with clear observable ownership and narrow subscriptions."

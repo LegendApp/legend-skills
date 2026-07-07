@@ -1,4 +1,0 @@
-interface:
-  display_name: "Legend List Optimization"
-  short_description: "Optimize Legend List rendering and measurement"
-  default_prompt: "Use $legend-list-optimization to diagnose and improve this list performance issue."

@@ -1,6 +1,6 @@
 # Legend Skills
 
-Reusable agent skills for debugging, React/TypeScript style, and Legend ecosystem optimization.
+Reusable agent skills for debugging, React/TypeScript style, and Legend ecosystem best practices.
 
 ## Install
 
@@ -19,8 +19,8 @@ npx skills add LegendApp/legend-skills --skill diagnose
 npx skills add LegendApp/legend-skills --skill diagnose-fix-loop
 npx skills add LegendApp/legend-skills --skill git-conflicts
 npx skills add LegendApp/legend-skills --skill react-coding-style
-npx skills add LegendApp/legend-skills --skill legend-list-optimization
-npx skills add LegendApp/legend-skills --skill legend-state-optimization
+npx skills add LegendApp/legend-skills --skill legend-list-best-practices
+npx skills add LegendApp/legend-skills --skill legend-state-best-practices
 ```
 
 Some selected skills build on other skills. Install their dependency before using them:
@@ -48,8 +48,8 @@ npx skills add LegendApp/legend-skills --list
 - `diagnose-fix-loop`: iterates diagnosis, a scoped fix, verification, and fresh diagnosis until no useful fix remains.
 - `git-conflicts`: runs or continues rebases, merges, cherry-picks, and conflict resolution safely.
 - `react-coding-style`: React, React Native, and TypeScript implementation style focused on small render surfaces and stable identities.
-- `legend-list-optimization`: optimization and debugging guidance for `@legendapp/list` and `LegendList`.
-- `legend-state-optimization`: effective Legend State usage for React, React Native, and TypeScript code.
+- `legend-list-best-practices`: best-practice and debugging guidance for `@legendapp/list` and `LegendList`.
+- `legend-state-best-practices`: effective Legend State usage for React, React Native, and TypeScript code.
 
 ## Dependency Policy
 

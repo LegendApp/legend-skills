@@ -1,9 +1,9 @@
 ---
-name: legend-state-optimization
-description: Use Legend State and @legendapp/state effectively in React, React Native, and TypeScript code. Use when introducing or refactoring observables, replacing prop-drilled React state, removing manual subscription bridges, designing settings/session stores, preferring useValue/useObserveEffect/peek patterns, migrating deprecated use$/useSelector usage, or reducing re-renders with field-level reactive boundaries.
+name: legend-state-best-practices
+description: Use Legend State and @legendapp/state effectively in React, React Native, and TypeScript code. Use when introducing or refactoring observables, replacing prop-drilled React state, removing manual subscription bridges, designing settings/session stores, choosing reactive ownership boundaries, preferring useValue/useObserveEffect/peek patterns, migrating deprecated use$/useSelector usage, or reducing re-renders with field-level reactive boundaries.
 ---
 
-# Legend State Optimization
+# Legend State Best Practices
 
 ## Overview
 
