@@ -7,8 +7,6 @@ description: Commit git working tree changes with clean logical grouping and rep
 
 Use this skill to turn current git changes into one or more clean commits.
 
-Maintenance note: keep this skill aligned with `commit-confirm`; only the approval mode should differ.
-
 ## Approval Modes
 
 - **Direct mode**: If the user asks to commit, analyze the working tree and create the needed commit or commits without asking for a separate "go".

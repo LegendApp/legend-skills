@@ -15,7 +15,7 @@ If `$diagnose` is not installed or available, stop before making changes. Tell t
 npx skills add LegendApp/legend-skills --skill diagnose
 ```
 
-Then ask them to retry after installation. Do not reimplement the diagnosis workflow inside this skill.
+Then ask them to retry after installation.
 
 ## Loop
 
