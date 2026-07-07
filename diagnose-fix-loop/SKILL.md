@@ -9,6 +9,14 @@ Use this skill to drive a complete improvement loop, not a single debugging pass
 
 Before starting, load and follow `$diagnose`. Treat `$diagnose` as the evidence engine for each pass; this skill only adds the outer loop that plans, implements, re-runs diagnosis, and decides whether to continue.
 
+If `$diagnose` is not installed or available, stop before making changes. Tell the user to install it with:
+
+```bash
+npx skills add LegendApp/legend-skills --skill diagnose
+```
+
+Then ask them to retry after installation. Do not reimplement the diagnosis workflow inside this skill.
+
 ## Loop
 
 1. State the target outcome.
