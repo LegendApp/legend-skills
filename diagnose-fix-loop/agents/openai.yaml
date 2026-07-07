@@ -1,0 +1,4 @@
+interface:
+  display_name: "Diagnose Fix Loop"
+  short_description: "Iterate diagnosis, fixes, and verification"
+  default_prompt: "Use $diagnose-fix-loop to diagnose this problem, implement the smallest proven fix, and keep iterating until no useful fixes remain."
