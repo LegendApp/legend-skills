@@ -23,6 +23,11 @@ npx skills add LegendApp/legend-skills --skill legend-list-optimization
 npx skills add LegendApp/legend-skills --skill legend-state-optimization
 ```
 
+Some selected skills build on other skills. Install their dependency before using them:
+
+- `commit-confirm` requires `commit`.
+- `diagnose-fix-loop` requires `diagnose`.
+
 Install globally:
 
 ```bash
@@ -45,3 +50,7 @@ npx skills add LegendApp/legend-skills --list
 - `react-coding-style`: React, React Native, and TypeScript implementation style focused on small render surfaces and stable identities.
 - `legend-list-optimization`: optimization and debugging guidance for `@legendapp/list` and `LegendList`.
 - `legend-state-optimization`: effective Legend State usage for React, React Native, and TypeScript code.
+
+## Dependency Policy
+
+Skills may depend on another skill when that avoids copying a shared workflow. A dependent skill must clearly name its dependency, stop before acting if the dependency is unavailable, tell the user how to install the missing skill, and keep only the instructions that modify or extend the dependency's behavior.
