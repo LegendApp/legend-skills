@@ -1,4 +1,4 @@
 interface:
   display_name: "Diagnose"
   short_description: "Debug with evidence and regression checks"
-  default_prompt: "Use $diagnose to reproduce this problem, find the proven fault line, and verify the fix."
+  default_prompt: "Use $diagnose to reproduce this problem, keep diagnosis read-only until edits are requested, and verify any fix."

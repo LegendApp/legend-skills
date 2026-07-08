@@ -1,6 +1,6 @@
 ---
 name: diagnose-fix-loop
-description: Iterative diagnose-and-fix workflow that repeatedly uses the diagnose skill to find a proven problem, plan the smallest credible improvement, implement it, re-diagnose, and continue until no useful fix remains or user intervention is required. Use when asked to keep debugging, fix and verify, iterate until satisfied, improve after diagnosis, or run a diagnosis/fix/verification loop.
+description: Iterative diagnose-and-fix workflow that repeatedly uses the diagnose skill to find a proven problem, plan the smallest credible improvement, implement it, re-diagnose, and continue until no useful fix remains or user intervention is required. Requires the diagnose skill; selected installs must also install diagnose. Use when asked to keep debugging, fix and verify, iterate until satisfied, improve after diagnosis, or run a diagnosis/fix/verification loop.
 ---
 
 # Diagnose Fix Loop
@@ -9,7 +9,7 @@ Use this skill to drive a complete improvement loop, not a single debugging pass
 
 Before starting, load and follow `$diagnose`. Treat `$diagnose` as the evidence engine for each pass; this skill only adds the outer loop that plans, implements, re-runs diagnosis, and decides whether to continue.
 
-If `$diagnose` is not installed or available, stop before making changes. Tell the user to install it with:
+Selected installs do not install dependencies automatically. If `$diagnose` is not installed or available, stop before making changes. Tell the user to install it with:
 
 ```bash
 npx skills add LegendApp/legend-skills --skill diagnose

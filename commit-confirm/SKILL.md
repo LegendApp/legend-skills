@@ -1,6 +1,6 @@
 ---
 name: commit-confirm
-description: Approval-first wrapper for the commit skill. Requires the commit skill. Use when the user asks to commit with confirmation, review commits first, propose commits, wait for "go", or ask before committing.
+description: Approval-first wrapper for the commit skill. Requires the commit skill; selected installs must also install commit. Use when the user asks to commit with confirmation, review commits first, propose commits, wait for "go", or ask before committing.
 ---
 
 # Commit Confirm
@@ -9,7 +9,7 @@ Use this skill to run `$commit` in approval-first mode.
 
 Before starting, load and follow `$commit`. This skill only changes the approval behavior; `$commit` owns working-tree inspection, grouping, message style, staging, committing, and reporting.
 
-If `$commit` is not installed or available, stop before staging or committing. Tell the user to install it with:
+Selected installs do not install dependencies automatically. If `$commit` is not installed or available, stop before staging or committing. Tell the user to install it with:
 
 ```bash
 npx skills add LegendApp/legend-skills --skill commit

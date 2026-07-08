@@ -14,6 +14,9 @@ npx skills add LegendApp/legend-skills
 
 Install selected skills:
 
+Selected installs install only the named skill. If a skill lists a dependency,
+install the dependency first or install all skills together.
+
 ```bash
 npx skills add LegendApp/legend-skills --skill commit
 npx skills add LegendApp/legend-skills --skill commit-confirm
@@ -25,7 +28,7 @@ npx skills add LegendApp/legend-skills --skill legend-list-best-practices
 npx skills add LegendApp/legend-skills --skill legend-state-best-practices
 ```
 
-Some selected skills build on other skills. Install their dependency before using them:
+Dependency pairs for selected installs:
 
 - `commit-confirm` requires `commit`.
 - `diagnose-fix-loop` requires `diagnose`.
@@ -60,7 +63,7 @@ Use $commit to commit the current changes.
 
 Approval-first version of `commit`. It proposes commit groups and messages, then waits for explicit approval such as `go` before staging or committing.
 
-Use it when you want to review the commit plan first. Requires `commit`.
+Use it when you want to review the commit plan first. Requires `commit` when installed as a selected skill.
 
 Example:
 
@@ -84,7 +87,7 @@ Use $diagnose to find why this test is failing and verify the smallest fix.
 
 Iterative wrapper around `diagnose`. It runs a diagnosis pass, plans one scoped fix, implements it, verifies it, diagnoses the new state, and continues until no useful fix remains or user input is required.
 
-Use it when you want the agent to keep improving a bug or performance issue until the evidence says to stop. Requires `diagnose`.
+Use it when you want the agent to keep improving a bug or performance issue until the evidence says to stop. Requires `diagnose` when installed as a selected skill.
 
 Example:
 
@@ -118,28 +121,30 @@ Use $react-coding-style to implement this component change without causing unnec
 
 ### `legend-list-best-practices`
 
-Best-practice and debugging guidance for [`@legendapp/list`](https://github.com/LegendApp/legend-list) and `LegendList`. It covers virtualization, blanking while scrolling, mount cost, row measurement, `renderItem` stability, fixed-size rows, visible range callbacks, adaptive rendering, and related performance issues.
+Best-practice guidance for building, auditing, and fixing [`@legendapp/list`](https://github.com/LegendApp/legend-list) and `LegendList` usage. It covers virtualization, blanking while scrolling, mount cost, row measurement, `renderItem` stability, fixed-size rows, visible range callbacks, adaptive rendering, and related performance issues.
 
-Use it when working on a `LegendList`, diagnosing list performance, or reviewing a list implementation for avoidable row churn.
+Use it when building a new `LegendList`, diagnosing list performance, reviewing a list implementation for avoidable row churn, or fixing incorrect list usage.
 
 Example:
 
 ```text
-Use $legend-list-best-practices to audit this LegendList for scroll blanking and unstable row renders.
+Use $legend-list-best-practices to build, audit, or fix this LegendList implementation.
 ```
 
 ### `legend-state-best-practices`
 
-Guidance for using [`@legendapp/state`](https://github.com/LegendApp/legend-state) effectively in React, React Native, and TypeScript code. It focuses on observable ownership, narrow reactive boundaries, field-level subscriptions, persistence, settings stores, and avoiding unnecessary re-renders.
+Guidance for building, auditing, and fixing [`@legendapp/state`](https://github.com/LegendApp/legend-state) usage in React, React Native, and TypeScript code. It focuses on observable ownership, narrow reactive boundaries, field-level subscriptions, persistence, settings stores, and avoiding unnecessary re-renders.
 
-Use it when introducing or refactoring observables, replacing prop-drilled React state, migrating deprecated subscription APIs, or designing fine-grained reactive state.
+Use it when introducing new observables, auditing incorrect usage, replacing prop-drilled React state, migrating deprecated subscription APIs, or fixing reactive ownership and subscription boundaries.
 
 Example:
 
 ```text
-Use $legend-state-best-practices to refactor this prop-drilled settings state into narrow observable reads.
+Use $legend-state-best-practices to build, audit, or fix this Legend State flow.
 ```
 
 ## Dependency Policy
 
 Skills may depend on another skill when that avoids copying a shared workflow. A dependent skill must clearly name its dependency, stop before acting if the dependency is unavailable, tell the user how to install the missing skill, and keep only the instructions that modify or extend the dependency's behavior.
+
+Selected installs do not automatically install dependencies. Users who want the simplest setup should install all skills with `npx skills add LegendApp/legend-skills`.
