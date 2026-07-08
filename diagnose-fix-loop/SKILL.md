@@ -24,6 +24,7 @@ Then ask them to retry after installation.
 
 2. Run a `$diagnose` pass.
    Reproduce or measure the current problem, identify the proven fault line, and record the exact validation signal that will be re-run after the fix. If `$diagnose` reaches a stop rule, stop and report the blocker.
+   If the user asked for delegation, use it only for bounded evidence collection inside this pass; keep bottleneck ranking, fix selection, code edits, and final interpretation in the main loop.
 
 3. Make a ranked fix plan.
    Prefer one smallest credible fix at a time. The plan must include:

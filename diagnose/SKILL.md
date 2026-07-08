@@ -45,6 +45,22 @@ Load only the references that match the task:
 8. Account for temporary work.
    Keep diagnostic logs while diagnosis is ongoing. Remove them only when the user asks for cleanup or they become intentional durable diagnostics. If committing while logs remain, stage only the fix/test/product changes and leave temporary diagnostics unstaged.
 
+## Delegation
+
+Only use subagents when the user explicitly asks for delegation, subagents, parallel work, or token-optimized execution.
+
+When delegation is allowed, delegate mechanical evidence collection and bounded extraction work to faster or cheaper low-reasoning subagents: running known browser/app/device/CLI commands, collecting logs, screenshots, snapshots, traces, profiler artifacts, running known repro loops or focused tests, extracting relevant log lines, summarizing large artifacts, or comparing before/after outputs.
+
+Keep the main agent responsible for the reasoning-heavy path: choosing the feedback loop, deciding where and what to log, forming and ranking hypotheses, choosing the boundary to instrument, interpreting ambiguous evidence, editing code, and making the final diagnosis.
+
+Do not delegate the next blocking step, ambiguous diagnosis, fix selection, implementation, or overlapping file edits. Do not ask subagents to "analyze what to fix" unless the task is explicitly read-only advice and the main agent will independently verify the evidence before acting.
+
+Before launching subagents, give each one a narrow success condition, explicit artifact/output format, and a bounded command set or runtime. Prefer several small extraction jobs over one broad investigation. Tell subagents not to edit files, stage, commit, install packages, or run long builds unless that mutation is the explicit delegated task.
+
+After delegated work returns or is interrupted, check the working tree and relevant background processes before continuing. If a subagent made unexpected changes, do not assume they are wrong or revert them blindly; inspect the diff, identify ownership, and ask or preserve them when they may belong to another concurrent agent.
+
+Ask delegated agents to return compact evidence with command outcomes, artifact paths, file references, and exact relevant errors instead of full raw logs.
+
 ## Stop Rules
 
 Stop and ask for user input when:
