@@ -42,6 +42,7 @@ Subscribe at the leaf that needs the value.
 - Do not introduce deprecated subscription hooks. Replace them when changing nearby code if the version supports the replacement.
 - Do not introduce new `observer` wrappers. If existing code already uses `observer`, preserve it unless the task is explicitly to migrate that area.
 - Avoid unobserved `get()` calls in React render paths unless the target has configured auto tracking intentionally.
+- For derived render values, subscribe to the derived result instead of subscribing broadly and comparing after render. Prefer `useValue(() => selectedIndex$.get() === index)` over `useValue(selectedIndex$) === index` so only rows whose rendered boolean changes need to rerender.
 - Use built-in reactive components before inventing custom subscription plumbing: `Memo` for inline reactive text/children without parent rerender, `Computed` for a computed render fragment, `Show`/`Switch` for conditional UI, and `For` for observable arrays, objects, or maps.
 - Avoid direct observable subscriptions in every hot row when a list-level invalidation or row-version signal is the intended boundary.
 - Preserve stable parent structure. Let parents choose layout; let observable leaves read volatile values.
@@ -92,6 +93,7 @@ Keep persisted observable stores simple.
 Treat observable reads inside virtualized rows carefully.
 
 - Avoid making every row subscribe to broad theme, font, settings, or selection objects.
+- In row fanout cases, look for `useValue(source$) === rowKey`, `useValue(source$).includes(rowKey)`, or similar local comparisons that rerender every subscriber on source changes. Replace them with a selector-style `useValue(() => source$.get() === rowKey)` or another primitive derived value when that matches the UI.
 - Prefer row-local observables, row-version stamps, selector-style reads, or list `extraData` only when the invalidation scope matches the UI.
 - For observable collections in React, consider `For` first: it shallow-tracks collection membership and passes `item$` to stable row components.
 - Keep row geometry stable when using observables to blank or simplify expensive content.
