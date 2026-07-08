@@ -1,6 +1,6 @@
 ---
 name: legend-state-best-practices
-description: Use Legend State and @legendapp/state effectively in React, React Native, and TypeScript code. Use when introducing or refactoring observables, replacing prop-drilled React state, removing manual subscription bridges, designing settings/session stores, choosing reactive ownership boundaries, preferring useValue/useObserveEffect/peek patterns, migrating deprecated use$/useSelector usage, or reducing re-renders with field-level reactive boundaries.
+description: Use Legend State and @legendapp/state effectively in React, React Native, and TypeScript code. Use when implementing, auditing, introducing, or refactoring observables, replacing prop-drilled React state, removing manual subscription bridges, designing settings/session stores, choosing reactive ownership boundaries, preferring useValue/useObserveEffect/peek patterns, migrating deprecated use$/useSelector usage, or reducing re-renders with field-level reactive boundaries.
 ---
 
 # Legend State Best Practices
@@ -11,12 +11,33 @@ Use this skill for Legend State-specific reactive ownership, subscription, persi
 
 Use Legend State to move reactive ownership to the smallest useful boundary. Prefer it when state would otherwise be copied through parents, mirrored by effects, or fanned out through props just to update leaf UI.
 
+## Authoritative References
+
+This skill is not a complete Legend State API reference. Use it for review policy and implementation judgment. For exact imports, signatures, persistence/sync setup, and version-specific behavior, verify the installed package version, inspect local source/tests and nearby project usage, and consult the current docs:
+
+- Human docs: https://legendapp.com/open-source/state/v3/intro/introduction/
+- LLM docs index: https://legendapp.com/open-source/state/v3/llms.txt
+- Full LLM docs: https://legendapp.com/open-source/state/v3/llms-full.txt
+
+Prefer `llms.txt` for targeted doc lookup. Use `llms-full.txt` only when the task is broad enough to need the full documentation context.
+
+## Modes
+
+Use one of three modes:
+
+- **Build mode**: when creating new Legend State usage, verify the installed version, consult the docs above for exact API shape, then choose observable ownership, subscription boundaries, persistence/sync setup, and validation before writing code.
+- **Audit mode**: when reviewing existing usage, inspect ownership, render subscriptions, non-reactive reads, effects, persistence boundaries, and hot paths. Rank findings by likely user impact and confidence, and distinguish proven misuse from optional cleanup.
+- **Implementation mode**: when fixing incorrect usage, first run the same audit as audit mode, state a ranked implementation plan for non-trivial rewrites, and stop for explicit approval such as `go` when the fix changes ownership, persistence, or broad render behavior. After approval, implement the high-confidence fixes in narrow reviewable slices and validate the changed behavior.
+
+Do not split analysis and implementation into separate mental models. The audit should recommend the same ownership and boundary shapes you would be willing to implement, and fixes should address the proven misuse rather than applying generic observable rewrites.
+
 ## First Pass
 
 Before changing code:
 
 - Search for existing observable helpers, store factories, persistence wrappers, and hook naming conventions.
 - Check which Legend State major/API style the target uses. Prefer the current documented subscription hook for that version; in modern code this is usually `useValue`. Treat deprecated aliases as migration candidates when the target version documents them as deprecated.
+- For non-trivial implementation, consult the docs above before inventing API shapes or persistence/sync configuration.
 - Identify which values must update rendered UI and which values only need current reads inside commands, event handlers, native bridges, or async work.
 - Find broad React state, context values, `useSyncExternalStore` bridges, or parent props that exist mostly to relay state to children.
 - Check whether backward compatibility for persisted state is required. If resets are acceptable, prefer complete `initialValue` defaults over runtime default-merging helpers.
@@ -66,6 +87,22 @@ Choose reactive or non-reactive reads intentionally.
 - Use latest-ref or stable-callback patterns when integrating observables with external listeners that need fresh values but stable identities.
 - Avoid large dependency arrays created only because React state is carrying values that could be read from the observable at the action boundary.
 
+## React-To-Observable Mirrors
+
+Treat `useEffect` or `useLayoutEffect` that calls `.set(...)`, `.assign(...)`, `mergeIntoObservable(...)`, or similar observable writes from React props, React state, or memoized render objects as a warning.
+
+This is usually an anti-pattern when the observable exists only to relay the latest React-rendered value to children. It makes React the real owner and turns the observable into a delayed notification bus.
+
+Prefer one of these instead:
+
+- Make the observable the canonical owner and update it at the mutation or source boundary.
+- Use `useObservable(() => derivedValue, deps)` or `useComputed` when an observable should be derived from explicit dependencies.
+- Pass stable props directly when broad rerender is acceptable and matches the UI invalidation scope.
+- Use latest refs or stable callbacks for imperative current reads.
+- Keep commands and functions out of render-state observables unless UI truly renders from them.
+
+Allowed effect writes are narrow: synchronize an observable change to an external imperative system, native bridge, storage, measurement cache, or lifecycle command where the effect is the integration boundary, not a mirror for render state.
+
 ## Effects
 
 Prefer observable-driven effects for observable state changes.
@@ -113,6 +150,9 @@ Match tests to the behavior changed.
 - Does each observable read intentionally subscribe this component?
 - Can a broad parent read move into a smaller observed leaf?
 - Can an event or command use a non-reactive current read instead of causing a render dependency?
+- Does any `useEffect` or `useLayoutEffect` write to an observable from React props, React state, or memo values?
+- Is an observable the canonical owner, or is it just mirroring a React value after commit?
+- Could a React-to-observable mirror be replaced with source-boundary writes, `useObservable(() => value, deps)`, `useComputed`, stable props, or latest refs?
 - Is an effect synchronizing with the outside world, or just compensating for state shape?
 - Is a built-in reactive primitive (`useValue`, `Memo`, `Show`, `For`, `observe`, `when`, `event`) a simpler fit than a custom bridge?
 - Did this change avoid adding deprecated subscription APIs?

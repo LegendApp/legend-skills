@@ -1,6 +1,6 @@
 ---
 name: legend-list-best-practices
-description: Use Legend List and @legendapp/list correctly in React, React Native, and web apps. Use when working with LegendList, virtualization, scroll blanking, mount cost, row measurement, renderItem stability, maintainVisibleContentPosition, adaptive rendering, drawDistance, fixed-size rows, visible range callbacks, keyExtractor/getItemType/getFixedItemSize behavior, list implementation reviews, or list-related performance regressions.
+description: Use Legend List and @legendapp/list correctly in React, React Native, and web apps. Use when building, auditing, fixing, or reviewing LegendList usage, virtualization, scroll blanking, mount cost, row measurement, renderItem stability, maintainVisibleContentPosition, adaptive rendering, drawDistance, fixed-size rows, visible range callbacks, keyExtractor/getItemType/getFixedItemSize behavior, list implementation reviews, or list-related performance regressions.
 ---
 
 # Legend List Best Practices
@@ -13,12 +13,25 @@ Use Legend List by separating viewport work, buffered work, measurement work, an
 
 When any implementation touches `LegendList`, `@legendapp/list`, list virtualization, list rows, list measurement, scroll behavior, or related props, apply this skill's audit checks to the affected list even if the user did not name the skill explicitly.
 
-Use one of two modes:
+## Authoritative References
 
+This skill is not a complete Legend List API reference. Use it for review policy and implementation judgment. For exact imports, signatures, platform-specific props, keyboard/animated setup, and version-specific behavior, verify the installed package version, inspect local source/tests and nearby project usage, and consult the current docs:
+
+- Human docs: https://legendapp.com/open-source/list/v3/overview/
+- LLM docs index: https://legendapp.com/open-source/list/v3/llms.txt
+- Full LLM docs: https://legendapp.com/open-source/list/v3/llms-full.txt
+
+Prefer `llms.txt` for targeted doc lookup. Use `llms-full.txt` only when the task is broad enough to need the full documentation context.
+
+## Modes
+
+Use one of three modes:
+
+- **Build mode**: when creating new list usage, verify the target platform and installed version, consult the docs above for exact API shape, then design the list around stable entrypoints, keys, row identity, measurement hints, and validation from the start.
 - **Audit mode**: when the user asks whether a list can be improved, inspect the existing list and row boundaries, rank concrete opportunities by impact and confidence, and distinguish measured problems from design risks.
-- **Implementation mode**: when the user asks for a fix, first run the same audit as audit mode, state a ranked implementation plan, and stop for explicit approval such as `go`. After approval, implement the high-confidence fixes in narrow reviewable slices, then validate with focused evidence.
+- **Implementation mode**: when the user asks for a fix, first run the same audit as audit mode, state a ranked implementation plan, and stop for explicit approval such as `go` for non-trivial rewrites. After approval, implement the high-confidence fixes in narrow reviewable slices, then validate with focused evidence.
 
-Do not split analysis and implementation into separate mental models. The audit should recommend the same shapes you would be willing to implement.
+Do not split analysis and implementation into separate mental models. The audit should recommend the same shapes you would be willing to implement, and fixes should address the proven misuse rather than applying generic list tweaks.
 
 ## Diagnosis Order
 
@@ -53,9 +66,12 @@ Use adaptive rendering to reduce row commit cost under pressure.
 
 Avoid unnecessary full-data work.
 
+- Choose the correct entrypoint before optimizing: React Native uses `@legendapp/list/react-native`, React Web uses `@legendapp/list/react`, React Native Web usually keeps the React Native entrypoint, and SectionList/keyboard/animated variants have separate documented entrypoints.
+- Use either `data` + `renderItem` or children mode. Do not mix the two render contracts.
 - If data is effectively index-addressed, avoid handing the list a fully materialized huge array when a bounded or estimated access path can work.
 - Treat repeated `keyExtractor` calls as a signal to inspect both layout/index passes and structural data-change checks.
 - Provide stable `keyExtractor`, `getItemType`, and `getFixedItemSize` when they match the data. Keep these callbacks cheap and identity-stable.
+- Use stable logical keys, not indexes, for data that can reorder, prepend, delete, or recycle. Bad keys attach cached sizes and recycled row state to the wrong item.
 - Prefer list-owned reset props such as `dataKey` when changing data identity should reset internal list state without remounting the list or its ancestors. Avoid `key={...}` on `LegendList` or parent containers solely to force a reset; it remounts the visible row subtree and repeats mount work.
 - For uniform fixed rows, align wrapper height, `getFixedItemSize`, and visual row layout.
 - Do not chase row-render micro-optimizations when pre-render bookkeeping is the proven bottleneck.
@@ -99,6 +115,22 @@ Respect measured layout ownership.
 - Treat subpixel native measurement churn as real until proven otherwise; round or stabilize at the source if it causes repeated updates.
 - Keep footer and header layout in the same measurement model as rows when scroll-at-end or MVCP depends on total content size.
 
+## Recycling And Stateful Rows
+
+Use recycling only when row state and keys are safe for reuse.
+
+- Treat `recycleItems` as an opt-in performance tool, especially on React Native. It can reuse row components for different items, so local component state, refs, animations, uncontrolled inputs, media playback, and native handles must reset from the current item identity.
+- Prefer item-keyed state outside the recycled row or explicit per-key reset effects when row-local state must survive item changes.
+- Do not enable recycling to hide row mount cost until keys, row identity, and state reset behavior are correct.
+
+## Chat And Timeline Lists
+
+Use timeline primitives instead of inverted-list workarounds.
+
+- For chat, feeds, and bidirectional pagination, inspect `initialScrollAtEnd`, `initialScrollIndex`, `maintainScrollAtEnd`, `maintainVisibleContentPosition`, `onStartReached`, `onEndReached`, `anchoredEndSpace`, and keyboard/composer insets before inventing scroll compensation.
+- Keep MVCP, end-following, composer space, and keyboard avoidance as separate contracts. A fix for one should not silently change the others.
+- When prepending, deleting, or changing item sizes, validate both the mounted visible rows and the stale offscreen measurement cache.
+
 ## Range State
 
 Use the list's computed state when available.
@@ -106,6 +138,14 @@ Use the list's computed state when available.
 - Prefer `getState().start/end/startBuffered/endBuffered` or equivalent list-owned state over `offset / rowHeight` guesses, especially with mixed-height rows.
 - Keep top-visible-item APIs narrow when the app only needs sidebar or outline sync. Avoid broad visible-range callbacks unless consumers need the full range.
 - If the list reports at-end while the rendered buffered range lags the last index, investigate stale cached range paths rather than scroll position first.
+
+## Advanced Diagnostics
+
+Use documented diagnostics before guessing from scroll offsets.
+
+- For visibility, prefer list APIs such as viewability callbacks, `useViewability`, `useViewabilityAmount`, `onFirstVisibleItemChanged`, `getState()`, and listener helpers when they match the consumer's needed scope.
+- For mutable data, inspect whether `dataVersion` or `itemsAreEqual` is the correct contract before forcing remounts or rebuilding the whole data array.
+- For imperative scroll bugs, remember that ref scroll methods may be async; validate lifecycle timing and layout readiness before treating a scroll target as wrong.
 
 ## Layout Props
 
