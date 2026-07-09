@@ -72,7 +72,10 @@ Avoid unnecessary full-data work.
 - Treat repeated `keyExtractor` calls as a signal to inspect both layout/index passes and structural data-change checks.
 - Provide stable `keyExtractor`, `getItemType`, and `getFixedItemSize` when they match the data. Keep these callbacks cheap and identity-stable.
 - Use stable logical keys, not indexes, for data that can reorder, prepend, delete, or recycle. Bad keys attach cached sizes and recycled row state to the wrong item.
-- Prefer list-owned reset props such as `dataKey` when changing data identity should reset internal list state without remounting the list or its ancestors. Avoid `key={...}` on `LegendList` or parent containers solely to force a reset; it remounts the visible row subtree and repeats mount work.
+- Treat React `key` on `LegendList`, its wrapper, or a list row as a last-resort remount tool, not a normal data-change signal. It throws away React subtree state, repeats mount work, and can mask the list-owned identity contract that should be expressed through props.
+- Prefer `dataKey` when the logical dataset changes and the list should reset its internal data/layout state without remounting the list or its ancestors. Use `dataVersion` when the same logical dataset mutates without a new array reference.
+- Keep `keyExtractor` focused on stable item identity inside the dataset. It is not a replacement for `dataKey`, and `dataKey` is not a replacement for item keys.
+- Only keep a React `key` when the product behavior explicitly requires a full remount outside Legend List's state model, such as resetting non-list child state, replacing an incompatible root component, or preserving a documented workaround that has been retested against the installed list version. Call that out in review instead of treating the key as harmless.
 - For uniform fixed rows, align wrapper height, `getFixedItemSize`, and visual row layout.
 - Do not chase row-render micro-optimizations when pre-render bookkeeping is the proven bottleneck.
 
