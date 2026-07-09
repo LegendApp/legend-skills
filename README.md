@@ -14,21 +14,21 @@ npx skills add LegendApp/legend-skills
 
 Install selected skills:
 
-Selected installs install only the named skill. If a skill lists a dependency,
-install the dependency first or install all skills together.
+Each command is a complete selected install for that use case. Skills with
+dependencies include them in the same command.
 
 ```bash
 npx skills add LegendApp/legend-skills --skill commit
-npx skills add LegendApp/legend-skills --skill commit-confirm
+npx skills add LegendApp/legend-skills --skill commit --skill commit-confirm
 npx skills add LegendApp/legend-skills --skill diagnose
-npx skills add LegendApp/legend-skills --skill diagnose-fix-loop
+npx skills add LegendApp/legend-skills --skill diagnose --skill diagnose-fix-loop
 npx skills add LegendApp/legend-skills --skill git-conflicts
 npx skills add LegendApp/legend-skills --skill react-coding-style
 npx skills add LegendApp/legend-skills --skill legend-list-best-practices
 npx skills add LegendApp/legend-skills --skill legend-state-best-practices
 ```
 
-Dependency pairs for selected installs:
+Dependency pairs:
 
 - `commit-confirm` requires `commit`.
 - `diagnose-fix-loop` requires `diagnose`.
@@ -49,14 +49,14 @@ npx skills add LegendApp/legend-skills --list
 
 ### `commit`
 
-Creates one or more clean Git commits from the current working tree. It reads repository guidance, groups related changes, stages only the right files or hunks, uses conventional commit messages, and reports any remaining unstaged work.
+Creates one or more git commits, splitting commits when the changes clearly have multiple goals. It reads repository guidance, groups related changes, stages only the right files or hunks, and uses conventional commit messages.
 
 Use it when you want the agent to commit changes directly.
 
 Example:
 
 ```text
-Use $commit to commit the current changes.
+$commit
 ```
 
 ### `commit-confirm`
@@ -68,7 +68,7 @@ Use it when you want to review the commit plan first. Requires `commit` when ins
 Example:
 
 ```text
-Use $commit-confirm to propose commits for this branch, but wait for my approval.
+$commit-confirm
 ```
 
 ### `diagnose`

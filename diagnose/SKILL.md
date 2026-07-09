@@ -24,6 +24,14 @@ Load only the references that match the task:
 1. Build a feedback loop.
    Prefer the fastest deterministic pass/fail signal that reproduces the user's symptom: focused test, HTTP/CLI script, browser test, captured trace replay, throwaway harness, fuzz/repeat loop, app/device automation, or a structured human-in-the-loop script.
 
+   Run the reproduction automatically when the required inputs, app state, tools, credentials, and pass/fail signal are available to the agent; the action is non-destructive; and the agent can directly observe whether the reported symptom occurred.
+
+   Ask the user to reproduce when the bug depends on inaccessible external state, a physical device or account the agent cannot access, private credentials, subjective interaction the agent cannot observe, a tool install or permission the user has not approved, or a real-world action that could be destructive, costly, or privacy-sensitive.
+
+   When user reproduction is required, prepare everything needed to receive useful evidence before asking: add targeted instrumentation if allowed, start the relevant log/trace/screenshot collection, provide exact repro steps, name the expected observation, and identify the artifact paths or command output the agent will inspect. Then ask the user to reproduce the issue and reply `done` when finished reproducing it. Do not claim the bug is reproduced or fixed until the user-provided logs, screenshots, traces, or observations confirm the same failure mode.
+
+   After a user-driven reproduction confirms the issue, convert it into an agent-runnable loop or regression test when practical. If that is not practical, state the remaining manual verification requirement explicitly.
+
 2. Reproduce the actual bug.
    Confirm the loop shows the same failure mode the user reported, not a nearby error. For flakes, raise the reproduction rate enough to debug.
 
