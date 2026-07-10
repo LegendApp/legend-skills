@@ -61,7 +61,6 @@ Prefer `recycleItems={true}`, especially on React Native, where recycling has th
 - `estimatedItemSize` and `estimatedListSize` are optional first-render hints. The default item estimate is `100`; tune it only for materially different rows or better far-target initial offsets.
 - Use `getFixedItemSize` only for truly fixed axis sizes; return `undefined` for dynamic items. The value must match wrapper spacing and visual geometry. Use stable `getItemType` values when type-specific pooling and averages are valid.
 - Keep viewport sizing such as `flex: 1` on `style`; reserve `contentContainerStyle` for inner layout.
-- Preserve row geometry when temporarily simplifying expensive content.
 - Before clearing caches, prove they are stale. Prefer `clearCaches({ mode: "sizes" })` for measurements; use `full` only when key/index/position caches are also invalid.
 - Tune `drawDistance` only after row cost and measurement are sound. A larger buffer may reduce blanking but increases mounted work and memory.
 - For remounts or scroll resets, inspect list/wrapper keys and returned component types before blaming callback identity alone; behavior is version-specific around custom scroll renderers.

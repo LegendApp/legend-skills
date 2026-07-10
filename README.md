@@ -1,6 +1,7 @@
 # Legend Skills
 
-Legend Skills gives coding agents proven workflows in two groups:
+Legend Skills gives coding agents focused workflows in two groups:
+
 1. **Legend library skills** for building fast, correct apps with Legend List and Legend State
 2. **General React and React Native development skills** for debugging difficult issues, fixing them completely, protecting Git history, and high-performance React and React Native apps.
 
@@ -169,7 +170,7 @@ Use $legend-list-best-practices to audit ChatMessages.tsx
 
 Guidance for building, auditing, and fixing [`@legendapp/state`](https://github.com/LegendApp/legend-state) usage in React, React Native, and TypeScript code. It focuses on observable ownership, narrow reactive boundaries, field-level subscriptions, persistence, settings stores, and avoiding unnecessary re-renders.
 
-Use it when using Legend State, building new new observables, auditing incorrect usage, replacing React state, or fixing reactive ownership and subscription boundaries.
+Use it when using Legend State, building new observables, auditing incorrect usage, replacing React state, or fixing reactive ownership, subscription, persistence, and sync boundaries.
 
 It will often apply automatically when it sees Legend State usage.
 
