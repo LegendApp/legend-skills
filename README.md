@@ -76,7 +76,7 @@ The paired commands above install each wrapper with its dependency. Installing t
 
 ## Skills
 
-### `commit`
+### commit
 
 Inspects the whole working tree, groups related changes, stages only the intended files or hunks, and creates one or more commits using repository conventions.
 
@@ -88,7 +88,7 @@ It can usually be used without any additional guidance.
 $commit
 ```
 
-### `commit-confirm`
+### commit-confirm
 
 Runs `commit` in approval-first mode: it proposes commit groups, messages, and files, then waits for explicit approval before staging or committing.
 
@@ -100,7 +100,7 @@ It can usually be used without any additional guidance.
 $commit-confirm
 ```
 
-### `diagnose`
+### diagnose
 
 Runs an evidence-first loop to prove the causes of an issue with 100% operational confidence:
 
@@ -120,7 +120,7 @@ $diagnose to find why the checkout button sometimes submits twice
 $diagnose startup performance to find the top contributors to first paint time.
 ```
 
-### `diagnose-fix-loop`
+### diagnose-fix-loop
 
 Runs `diagnose` in an iterative improvement loop:
 
@@ -135,7 +135,7 @@ Use it when you want the agent to keep working through a bug or performance prob
 $diagnose-fix-loop to reduce the Profile screen's load time
 ```
 
-### `git-conflicts`
+### git-conflicts
 
 Detects an active rebase, merge, cherry-pick, or revert before starting new work. If the operation or intended resolution is not 100% clear, it stops before editing, staging, or continuing and asks for guidance with concrete options.
 
@@ -153,9 +153,9 @@ To fix a conflicted rebase/merge:
 $git-conflicts
 ```
 
-### `legend-list-best-practices`
+### legend-list-best-practices
 
-Best-practice guidance for building, auditing, and improving [`@legendapp/list`](https://github.com/LegendApp/legend-list) and `LegendList` usage. It helps improve blanking while scrolling, mount cost, row measurement, `renderItem` stability, and performance issues.
+Best-practice guidance for building, auditing, and improving [`@legendapp/list`](https://github.com/LegendApp/legend-list) and `LegendList` usage. It checks data identity and invalidation, row rendering, recycling safety, measurement, and chat/scroll behavior to prevent blanking, stale rows, state leakage, and unnecessary re-renders.
 
 Use it when using a `LegendList` to improve performance and correctness.
 
@@ -165,7 +165,7 @@ It will often apply automatically when it sees Legend List usage.
 Use $legend-list-best-practices to audit ChatMessages.tsx
 ```
 
-### `legend-state-best-practices`
+### legend-state-best-practices
 
 Guidance for building, auditing, and fixing [`@legendapp/state`](https://github.com/LegendApp/legend-state) usage in React, React Native, and TypeScript code. It focuses on observable ownership, narrow reactive boundaries, field-level subscriptions, persistence, settings stores, and avoiding unnecessary re-renders.
 
@@ -177,7 +177,7 @@ It will often apply automatically when it sees Legend State usage.
 Use $legend-state-best-practices to move this selection state out of the parent and make each row subscribe only to whether its own selected state changed.
 ```
 
-### `react-coding-style`
+### react-coding-style
 
 Guides React, React Native, and TypeScript to render less, less often.
 
