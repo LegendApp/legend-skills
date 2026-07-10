@@ -9,8 +9,8 @@ Legend Skills gives coding agents focused workflows in two groups:
 
 | Skill | Useful for |
 | --- | --- |
-| [commit](#commit) | Turning a mixed working tree into clean, focused commits that follow repository conventions. |
-| [commit-confirm](#commit-confirm) | Reviewing proposed commit groups and messages before anything is staged or committed. |
+| [commit](#commit) | Committing only the current agent's changes by default, grouped into clean commits. |
+| [commit-confirm](#commit-confirm) | Reviewing how all working-tree changes will be grouped before anything is committed. |
 | [diagnose](#diagnose) | Proving the root cause of unclear, intermittent, platform-specific, or performance bugs before editing. |
 | [diagnose-fix-loop](#diagnose-fix-loop) | Repeatedly diagnosing, fixing, and verifying until no useful evidence-backed improvement remains. |
 | [git-conflicts](#git-conflicts) | Safely resolving or continuing rebases, merges, cherry-picks, and reverts. |
@@ -79,7 +79,7 @@ The paired commands above install each wrapper with its dependency. Installing t
 
 ### commit
 
-Inspects the whole working tree, groups related changes, stages only the intended files or hunks, and creates one or more commits using repository conventions.
+Inspects the whole working tree for context, but commits only changes made by the current agent in the current task unless you explicitly ask to commit all. It groups the requested changes, stages only the intended files or hunks, and creates one or more commits using repository conventions.
 
 Use it when the work is ready and you want clean commits that can be reviewed or reverted independently.
 
@@ -91,7 +91,7 @@ $commit
 
 ### commit-confirm
 
-Runs `commit` in approval-first mode: it proposes commit groups, messages, and files, then waits for explicit approval before staging or committing.
+Runs `commit` in approval-first mode and defaults to the whole working tree: it proposes commit groups, messages, and files, then waits for explicit approval before staging or committing.
 
 Use it when you want to review the commit boundaries first. Requires `commit`.
 

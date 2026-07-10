@@ -1,30 +1,38 @@
 ---
 name: commit
-description: Commit git working tree changes with clean logical grouping and repository commit-message conventions. Use when the user asks to commit changes, make a commit, commit all changes, split changes into commits, propose commit messages, or wait for "go" before committing.
+description: Commit the current agent's changes by default, or all working-tree changes when explicitly requested, with clean logical grouping and repository commit-message conventions. Use when the user asks to commit changes, commit this work, commit all changes, split changes into commits, propose commit messages, or wait for "go" before committing.
 ---
 
 # Commit
 
-Use this skill to turn current git changes into one or more clean commits.
+Use this skill to turn the requested changes into one or more clean commits without absorbing unrelated work.
+
+## Scope
+
+- **Default:** commit only changes made by the current agent in the current task. Determine ownership from the known starting state, conversation, and tool history; do not infer it merely from the current diff or file path.
+- **All changes:** inspect and commit the whole working tree only when the user explicitly asks to commit all, everything, or the whole tree.
+- **Explicit subset:** honor any files, hunks, commits, or exclusions named by the user.
+- If change ownership or the requested boundary cannot be determined reliably, stop before staging and ask. Never include pre-existing, concurrent, or user-authored changes by guesswork.
 
 ## Approval Modes
 
-- **Direct mode**: If the user asks to commit, analyze the working tree and create the needed commit or commits without asking for a separate "go".
+- **Direct mode**: If the user asks to commit, analyze the requested scope and create the needed commit or commits without asking for a separate "go".
 - **Plan mode**: If the user asks for a plan, asks to review commits first, says to wait, says to prompt or ask before committing, or otherwise requests approval first, present a commit plan and wait for explicit approval such as `go` before staging or committing. After approval, create all agreed commits without asking again unless the working tree changes unexpectedly.
-- **Clarification stop**: In any mode, stop before committing if mixed hunks cannot be staged safely, repository guidance conflicts with the user's request, or the intended grouping is ambiguous enough that committing would risk losing user intent.
+- **Clarification stop**: In any mode, stop before committing if ownership is unclear, mixed hunks cannot be staged safely, repository guidance conflicts with the user's request, or the intended grouping is ambiguous enough that committing would risk losing user intent.
 - **Approval response**: If a previous turn presented a commit plan and the user now says `go`, treat that as approval for that plan. Re-check the working tree before staging.
 
 ## Inspect
 
 1. Read repository guidance first: `AGENTS.md`, contribution docs, or visible commit conventions.
 2. Inspect state with `git status -sb`, `git diff --stat`, `git diff --staged --stat`, and targeted `git diff` / `git diff --staged`. Inspect relevant untracked files before staging them.
-3. Record staged and unstaged changes separately, then treat them as one pool for logical grouping. Do not assume the current index is the intended commit boundary; preserve explicit exclusions and user intent when regrouping.
-4. Respect explicit exclusions, such as debug logs or generated artifacts the user said not to commit. Leave excluded changes unstaged and report them afterward.
-5. If the tree is clean, say so and stop.
+3. Classify staged, unstaged, and untracked changes as in or out of scope. Treat the full tree as context, not as permission to commit it.
+4. Preserve out-of-scope staged changes. If scoped changes occupy fully owned paths, a path-limited commit may leave unrelated index entries intact; if scoped and unrelated hunks share a path or safe isolation is uncertain, stop and ask rather than unstaging or committing someone else's work.
+5. Respect explicit exclusions, such as debug logs or generated artifacts the user said not to commit. Leave excluded changes unstaged and report them afterward.
+6. If there are no in-scope changes, say so and report any remaining out-of-scope changes without committing them.
 
 ## Group
 
-Group by one coherent concept: feature, fix, refactor, test, docs, config, dependency, or subsystem. Prefer separate commits when changes would be reviewed, reverted, or explained independently.
+Group the in-scope changes by one coherent concept: feature, fix, refactor, test, docs, config, dependency, or subsystem. Prefer separate commits when changes would be reviewed, reverted, or explained independently.
 
 If a file contains unrelated changes, split by hunk with `git add -p` or another path/hunk-limited staging method. Do not put unrelated hunks in one commit just because they share a file.
 
@@ -75,8 +83,8 @@ In direct mode, do this planning internally. Only show a concise summary before 
 
 For each group:
 
-1. Stage only that group using path-limited or hunk-limited staging.
-2. Verify the staged diff matches the intended group with `git diff --staged --stat`, targeted `git diff --staged`, and `git diff --staged --check`.
+1. Stage only that group using path-limited or hunk-limited staging. Do not silently unstage out-of-scope changes.
+2. Verify the intended commit contains only that group with `git diff --staged --stat`, targeted `git diff --staged`, and `git diff --staged --check`. When unrelated index entries remain, use a path-limited commit only for fully owned paths and verify those paths separately.
 3. Commit with the agreed message.
 4. Re-check the tree after hooks run, then continue to the next group.
 
