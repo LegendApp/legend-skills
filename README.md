@@ -1,8 +1,23 @@
 # Legend Skills
 
-Reusable skills that give coding agents disciplined workflows for debugging, Git operations, React performance, and the Legend ecosystem.
+Legend Skills gives coding agents proven workflows in two groups:
+1. **Legend library skills** for building fast, correct apps with Legend List and Legend State
+2. **General React and React Native development skills** for debugging difficult issues, fixing them completely, protecting Git history, and high-performance React and React Native apps.
 
-The skills cover four concrete jobs: diagnosing bugs from evidence, creating and recovering clean Git history, writing React code with narrow render boundaries, and using Legend List and Legend State according to their real APIs. Each skill tells the agent what to inspect, which contracts matter, when user input is required, and how to verify the result.
+## Skills at a glance
+
+| Skill | Useful for |
+| --- | --- |
+| [`diagnose`](#diagnose) | Proving the root cause of unclear, intermittent, platform-specific, or performance bugs before editing. |
+| [`diagnose-fix-loop`](#diagnose-fix-loop) | Repeatedly diagnosing, fixing, and verifying until no useful evidence-backed improvement remains. |
+| [`commit`](#commit) | Turning a mixed working tree into clean, focused commits that follow repository conventions. |
+| [`commit-confirm`](#commit-confirm) | Reviewing proposed commit groups and messages before anything is staged or committed. |
+| [`git-conflicts`](#git-conflicts) | Safely resolving or continuing rebases, merges, cherry-picks, and reverts. |
+| [`react-coding-style`](#react-coding-style) | Building React, React Native, and TypeScript UI with narrow render boundaries and stable data flow. |
+| [`legend-list-best-practices`](#legend-list-best-practices) | Building or auditing fast virtualized lists with correct measurement, recycling, and row invalidation. |
+| [`legend-state-best-practices`](#legend-state-best-practices) | Designing observable state with clear ownership, fine-grained subscriptions, persistence, and sync. |
+
+Use one skill for a focused task or combine workflow and domain skills so the agent knows both *how to work* and *which technical contracts to protect*.
 
 ## Example
 
