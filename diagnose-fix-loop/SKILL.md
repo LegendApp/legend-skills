@@ -9,6 +9,8 @@ Use this skill to drive a complete improvement loop, not a single debugging pass
 
 Before starting, load and follow `$diagnose`. Treat `$diagnose` as the evidence engine for each pass; this skill only adds the outer loop that plans, implements, re-runs diagnosis, and decides whether to continue.
 
+This skill owns planning and implementation after `$diagnose` proves the cause.
+
 Selected installs do not install dependencies automatically. If `$diagnose` is not installed or available, stop before making changes. Tell the user to install it with:
 
 ```bash
@@ -23,7 +25,7 @@ Then ask them to retry after installation.
    Anchor the loop to the user's symptom, performance goal, failing test, UX defect, regression, or code quality concern. If the user gave no concrete anchor, create the fastest observable feedback loop first.
 
 2. Run a `$diagnose` pass.
-   Reproduce or measure the current problem, identify the proven fault line, and record the exact validation signal that will be re-run after the fix. If `$diagnose` reaches a stop rule, stop and report the blocker.
+   Complete the evidence loop and record the exact validation signal that will be re-run after the fix. Proceed only when `$diagnose` reports **Proven — 100%**. If it reports **Incomplete**, stop and report the missing evidence.
    If the user asked for delegation, use it only for bounded evidence collection inside this pass; keep bottleneck ranking, fix selection, code edits, and final interpretation in the main loop.
 
 3. Make a ranked fix plan.

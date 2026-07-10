@@ -59,18 +59,15 @@ Prefer:
 
 If adding logs changes reproducibility, switch to a less perturbing strategy before drawing conclusions.
 
-## Decisiveness
+## Confidence Loop
 
-Before implementing a fix, explicitly classify the evidence:
+After each instrumentation pass, re-rank every plausible cause and update its confidence score. Record which observation changed the score.
 
-- **Decisive**: the evidence isolates the fault line tightly enough that more probes are unlikely to change the conclusion.
-- **Not decisive**: a narrower probe can still distinguish plausible causes.
-
-If evidence is not decisive, add the next probe first. Do not stack speculative fixes.
+Before adding another probe, state which possible result would change the ranking or confidence. If no result would add discriminating evidence, or the last pass added no evidence and no distinct boundary remains, stop as incomplete instead of repeating.
 
 ## Keeping Logs
 
-Keep diagnostic logs in place while diagnosis is ongoing. Do not remove them just because a candidate fix is found; the user may want to continue diagnosing.
+Keep diagnostic logs in place while diagnosis is ongoing. Do not remove them just because a candidate cause is found; the user may want to continue diagnosing.
 
 Remove temporary logs only when:
 
@@ -83,7 +80,7 @@ Remove temporary logs only when:
 If the user asks to commit during or after diagnosis:
 
 1. Do not remove temporary logs just because of the commit.
-2. Stage only actual fix, test, and intended product changes with path-limited staging.
+2. Stage only intended durable changes with path-limited staging.
 3. Verify the staged diff excludes temporary logs and throwaway probes.
 4. Commit the staged changes.
 5. Report which diagnostic files remain unstaged.

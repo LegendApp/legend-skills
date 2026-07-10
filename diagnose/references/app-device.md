@@ -2,9 +2,7 @@
 
 Use this reference for live app evidence on mobile, device, desktop, TV, or React Native targets.
 
-These adapters are optional helpers. If neither is installed, continue with tests, logs, browser tooling, command-line repros, or user-provided artifacts where possible.
-
-For React Native live app testing, do not silently fall back when the preferred adapter is missing. Prompt the user to install the relevant adapter, provide the exact install command, and wait for the user to install it or approve the install before continuing with live device/simulator testing.
+These adapters are optional helpers. Use an equivalent host-provided app/device tool when one is already available. If live automation is required and no suitable adapter exists, provide the relevant install command and wait for the user to install it or approve installation. Otherwise continue with tests, logs, browser tooling, command-line repros, or user-provided artifacts.
 
 ## Detect Tools
 
@@ -15,7 +13,7 @@ command -v argent
 command -v agent-device
 ```
 
-Do not silently install tools. If a preferred adapter is missing, suggest the relevant command and wait for the user to install or approve.
+Do not silently install tools. Suggest installation only when the missing adapter blocks the required evidence loop.
 
 When using Argent or agent-device, check whether the installed tool is behind the npm latest version:
 

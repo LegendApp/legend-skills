@@ -17,8 +17,8 @@ Use this skill to turn current git changes into one or more clean commits.
 ## Inspect
 
 1. Read repository guidance first: `AGENTS.md`, contribution docs, or visible commit conventions.
-2. Inspect state with `git status -sb`, `git diff --stat`, `git diff --staged --stat`, and targeted `git diff` / `git diff --staged`.
-3. Treat staged and unstaged changes as one pool. Regroup them if needed; do not assume the current index is already the desired commit boundary.
+2. Inspect state with `git status -sb`, `git diff --stat`, `git diff --staged --stat`, and targeted `git diff` / `git diff --staged`. Inspect relevant untracked files before staging them.
+3. Record staged and unstaged changes separately, then treat them as one pool for logical grouping. Do not assume the current index is the intended commit boundary; preserve explicit exclusions and user intent when regrouping.
 4. Respect explicit exclusions, such as debug logs or generated artifacts the user said not to commit. Leave excluded changes unstaged and report them afterward.
 5. If the tree is clean, say so and stop.
 
@@ -76,8 +76,8 @@ In direct mode, do this planning internally. Only show a concise summary before 
 For each group:
 
 1. Stage only that group using path-limited or hunk-limited staging.
-2. Verify the staged diff matches the intended group with `git diff --staged --stat` and targeted `git diff --staged`.
+2. Verify the staged diff matches the intended group with `git diff --staged --stat`, targeted `git diff --staged`, and `git diff --staged --check`.
 3. Commit with the agreed message.
-4. Continue to the next group.
+4. Re-check the tree after hooks run, then continue to the next group.
 
 After all commits, report commit hashes and any remaining unstaged files. If a commit fails, stop and report the exact failure and the current git state.

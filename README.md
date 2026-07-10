@@ -1,8 +1,21 @@
 # Legend Skills
 
-Reusable agent skills for debugging, Git workflows, React/TypeScript implementation, and Legend ecosystem best practices.
+Reusable skills that give coding agents disciplined workflows for debugging, Git operations, React performance, and the Legend ecosystem.
 
-Skills are small instruction bundles for coding agents. Install this repo with `npx skills`, then ask your agent to use a skill by name, such as `$diagnose` or `$react-coding-style`.
+The skills cover four concrete jobs: diagnosing bugs from evidence, creating and recovering clean Git history, writing React code with narrow render boundaries, and using Legend List and Legend State according to their real APIs. Each skill tells the agent what to inspect, which contracts matter, when user input is required, and how to verify the result.
+
+## Example
+
+Ask an agent to combine the diagnosis workflow with the relevant domain skill:
+
+```text
+Use $diagnose and $legend-list-best-practices to find why this chat list blanks
+during fast scrolling. Reproduce and measure the problem first. If incorrect
+LegendList usage is the cause, implement the smallest fix and verify the original
+reproduction plus a focused regression test.
+```
+
+This tells the agent to prove the bottleneck before editing, apply Legend List's real data, measurement, recycling, and row-invalidation contracts, and verify the result against the original symptom.
 
 ## Install
 
@@ -12,10 +25,19 @@ Install all skills:
 npx skills add LegendApp/legend-skills
 ```
 
-Install selected skills:
+Install globally:
 
-Each command is a complete selected install for that use case. Skills with
-dependencies include them in the same command.
+```bash
+npx skills add LegendApp/legend-skills -g
+```
+
+List the available skills without installing:
+
+```bash
+npx skills add LegendApp/legend-skills --list
+```
+
+Install selected skills:
 
 ```bash
 npx skills add LegendApp/legend-skills --skill commit
@@ -28,32 +50,24 @@ npx skills add LegendApp/legend-skills --skill legend-list-best-practices
 npx skills add LegendApp/legend-skills --skill legend-state-best-practices
 ```
 
-Dependency pairs:
+## Skill dependencies
+
+Selected installs do not resolve dependencies automatically:
 
 - `commit-confirm` requires `commit`.
 - `diagnose-fix-loop` requires `diagnose`.
 
-Install globally:
-
-```bash
-npx skills add LegendApp/legend-skills -g
-```
-
-List available skills without installing:
-
-```bash
-npx skills add LegendApp/legend-skills --list
-```
+The paired commands above install each wrapper with its dependency. Installing the full repository is the simplest way to make every skill available.
 
 ## Skills
 
 ### `commit`
 
-Creates one or more git commits, splitting commits when the changes clearly have multiple goals. It reads repository guidance, groups related changes, stages only the right files or hunks, and uses conventional commit messages.
+Inspects the whole working tree, groups related changes, stages only the intended files or hunks, and creates one or more commits using repository conventions.
 
-Use it when you want the agent to commit changes directly.
+Use it when the work is ready and you want clean commits that can be reviewed or reverted independently.
 
-Example:
+It can usually be used without any additional guidance.
 
 ```text
 $commit
@@ -61,11 +75,11 @@ $commit
 
 ### `commit-confirm`
 
-Approval-first version of `commit`. It proposes commit groups and messages, then waits for explicit approval such as `go` before staging or committing.
+Runs `commit` in approval-first mode: it proposes commit groups, messages, and files, then waits for explicit approval before staging or committing.
 
-Use it when you want to review the commit plan first. Requires `commit` when installed as a selected skill.
+Use it when you want to review the commit boundaries first. Requires `commit`.
 
-Example:
+It can usually be used without any additional guidance.
 
 ```text
 $commit-confirm
@@ -73,78 +87,88 @@ $commit-confirm
 
 ### `diagnose`
 
-Evidence-first debugging workflow for hard bugs, app/browser issues, logs, flaky behavior, and performance regressions. It focuses on building a reproducible feedback loop, proving the real fault line, making the smallest credible fix, and verifying with regression coverage.
+Runs an evidence-first loop to prove the causes of an issue with 100% operational confidence:
 
-Use it when a problem is unclear, intermittent, performance-related, or needs proof before editing.
+1. Determine likely areas in the code causing an issue
+2. Instrument the code around the issue with extensive logging
+3. Reproduce the issue, with the agent if possible or asking the user if necessary
+4. Collect the logs and analyze them
+5. Determine confidence in the cause. If not fully confident, repeat.
 
-Example:
+Use it when a bug or issue is unclear, intermittent, platform-specific, performance-related, or too risky for guess-and-check editing. The agent runs the repro automatically when it can observe a safe deterministic result; otherwise it prepares logging or capture first and gives the user an exact manual reproduction step.
 
 ```text
-Use $diagnose to find why this test is failing and verify the smallest fix.
+$diagnose to find why the checkout button sometimes submits twice
+```
+
+```text
+$diagnose startup performance to find the top contributors to first paint time.
 ```
 
 ### `diagnose-fix-loop`
 
-Iterative wrapper around `diagnose`. It runs a diagnosis pass, plans one scoped fix, implements it, verifies it, diagnoses the new state, and continues until no useful fix remains or user input is required.
+Runs `diagnose` in an iterative improvement loop:
 
-Use it when you want the agent to keep improving a bug or performance issue until the evidence says to stop. Requires `diagnose` when installed as a selected skill.
+1. diagnose to find the top opportunities for improvement
+2. Choose the top fix and implement it
+3. Verify its success
+4. If any useful fixes remain, repeat until no evidence-backed improvement remains
 
-Example:
+Use it when you want the agent to keep working through a bug or performance problem instead of stopping after the first plausible fix. Requires `diagnose`.
 
 ```text
-Use $diagnose-fix-loop to keep debugging and fixing this slow screen until there is no clear next improvement.
+$diagnose-fix-loop to reduce the Profile screen's load time
 ```
 
 ### `git-conflicts`
 
-Safely handles Git integration operations and conflicts. It detects whether a rebase, merge, cherry-pick, or revert is already in progress before doing anything else, resolves straightforward conflicts, and asks for help when the conflict requires product or ownership judgment.
+Detects an active rebase, merge, cherry-pick, or revert before starting new work, resolves only unambiguous conflicts, continues the correct Git operation, and escalates behavioral conflicts with concrete options.
 
-Use it when you are rebasing, merging, cherry-picking, reverting, or stuck in an interrupted Git operation.
+Use it for branch integration or when Git is already stopped in a conflict and you want to avoid destructive recovery commands or incorrect `ours`/`theirs` assumptions.
 
-Example:
+To start a rebase:
 
 ```text
-Use $git-conflicts to continue this rebase and resolve any straightforward conflicts.
+$git-conflicts rebase on main
 ```
 
-### `react-coding-style`
-
-React, React Native, and TypeScript implementation guidance focused on small render surfaces, stable identities, direct data flow, and minimal effects. It helps avoid broad re-renders, large dependency arrays, effect-heavy control flow, unnecessary compatibility shims, and premature abstractions.
-
-Use it when changing components, hooks, callbacks, subscriptions, context reads, list rows, or render-sensitive UI code.
-
-Example:
+To fix a conflicted rebase/merge:
 
 ```text
-Use $react-coding-style to implement this component change without causing unnecessary re-renders.
+$git-conflicts
 ```
 
 ### `legend-list-best-practices`
 
-Best-practice guidance for building, auditing, and fixing [`@legendapp/list`](https://github.com/LegendApp/legend-list) and `LegendList` usage. It covers virtualization, blanking while scrolling, mount cost, row measurement, `renderItem` stability, fixed-size rows, visible range callbacks, adaptive rendering, and related performance issues.
+Best-practice guidance for building, auditing, and improving [`@legendapp/list`](https://github.com/LegendApp/legend-list) and `LegendList` usage. It helps improve blanking while scrolling, mount cost, row measurement, `renderItem` stability, and performance issues.
 
-Use it when building a new `LegendList`, diagnosing list performance, reviewing a list implementation for avoidable row churn, or fixing incorrect list usage.
+Use it when using a `LegendList` to improve performance and correctness.
 
-Example:
+It will often apply automatically when it sees Legend List usage.
 
 ```text
-Use $legend-list-best-practices to build, audit, or fix this LegendList implementation.
+Use $legend-list-best-practices to audit ChatMessages.tsx
 ```
 
 ### `legend-state-best-practices`
 
 Guidance for building, auditing, and fixing [`@legendapp/state`](https://github.com/LegendApp/legend-state) usage in React, React Native, and TypeScript code. It focuses on observable ownership, narrow reactive boundaries, field-level subscriptions, persistence, settings stores, and avoiding unnecessary re-renders.
 
-Use it when introducing new observables, auditing incorrect usage, replacing prop-drilled React state, migrating deprecated subscription APIs, or fixing reactive ownership and subscription boundaries.
+Use it when using Legend State, building new new observables, auditing incorrect usage, replacing React state, or fixing reactive ownership and subscription boundaries.
 
-Example:
+It will often apply automatically when it sees Legend State usage.
 
 ```text
-Use $legend-state-best-practices to build, audit, or fix this Legend State flow.
+Use $legend-state-best-practices to move this selection state out of the parent and make each row subscribe only to whether its own selected state changed.
 ```
 
-## Dependency Policy
+### `react-coding-style`
 
-Skills may depend on another skill when that avoids copying a shared workflow. A dependent skill must clearly name its dependency, stop before acting if the dependency is unavailable, tell the user how to install the missing skill, and keep only the instructions that modify or extend the dependency's behavior.
+Guides React, React Native, and TypeScript to render less, less often.
 
-Selected installs do not automatically install dependencies. Users who want the simplest setup should install all skills with `npx skills add LegendApp/legend-skills`.
+Use it for maximizing React performance. It helps reduce render work without trading away correctness or adding memoization that no consumer uses.
+
+```text
+Use $react-coding-style to refactor this settings panel so changing one field does
+not re-render every section. Preserve behavior and verify the new render boundaries.
+```

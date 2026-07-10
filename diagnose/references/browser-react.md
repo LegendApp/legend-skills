@@ -70,4 +70,4 @@ For browser bugs, prefer evidence that can become a regression:
 - screenshot only when visual layout matters
 - performance trace or React profiler result for performance claims
 
-Do not stop at "it looks fixed" when the same behavior can be asserted through DOM, URL, console, network, or test state.
+Do not stop when the symptom merely disappears if the same behavior can be asserted through DOM, URL, console, network, or test state.

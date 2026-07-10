@@ -1,81 +1,62 @@
 ---
 name: diagnose
-description: Disciplined diagnosis loop for hard bugs, browser bugs, app/device bugs, and performance regressions. Use when asked to debug, diagnose, investigate a bug, add logging, explain what is broken, reproduce a failure, or fix a regression with evidence.
+description: Evidence-first causal diagnosis for bugs, browser or app/device failures, flaky behavior, and performance regressions. Use to locate likely causes, instrument relevant boundaries with extensive structured logging, reproduce the issue, analyze the collected logs, rank causes with confidence scores, and pursue 100% operational confidence while probes can increase confidence.
 ---
 
 # Diagnose
 
-Use this skill to turn a symptom into evidence, a fix, and a regression check.
+Find and explain the cause of a symptom with 100% operational confidence.
 
-Start from the user's concrete anchor: file, route, error string, log line, screen, branch, bundle path, or repro step. If the user asks a question or asks what might be wrong, keep the pass read-only unless they ask for changes.
+Start from the user's concrete anchor: file, route, error, log, screen, branch, artifact, or reproduction step. Consult relevant architecture notes, ADRs, glossaries, and test docs. Inspect code, run safe tools or tests, and analyze existing artifacts. Add behavior-neutral instrumentation only with approval.
 
-If present, use the repository's domain glossary, architecture notes, ADRs, and local test docs to understand the area before editing.
+## References
 
-## Load References
+Load only what applies:
 
-Load only the references that match the task:
+- Browser or React web: [browser-react.md](references/browser-react.md)
+- iOS, Android, React Native, macOS, TV, or physical device: [app-device.md](references/app-device.md)
+- Logs, runtime probes, metrics, or debug hooks: [instrumentation.md](references/instrumentation.md)
 
-- Browser or React web bug: [browser-react.md](references/browser-react.md)
-- iOS, Android, React Native, macOS, TV, or physical-device bug: [app-device.md](references/app-device.md)
-- Runtime logs, probes, metrics, or temporary debug hooks: [instrumentation.md](references/instrumentation.md)
+## Evidence Loop
 
-## Workflow
+1. **Locate likely causes.** Inspect the code path and existing evidence around the user's anchor. Form the smallest useful set of likely areas and falsifiable candidate causes, including independent or contributing causes when applicable. Give each cause a distinguishing prediction and identify where those predictions diverge.
 
-1. Build a feedback loop.
-   Prefer the fastest deterministic pass/fail signal that reproduces the user's symptom: focused test, HTTP/CLI script, browser test, captured trace replay, throwaway harness, fuzz/repeat loop, app/device automation, or a structured human-in-the-loop script.
+2. **Instrument before reproducing.** Load [instrumentation.md](references/instrumentation.md) and add structured logging across the relevant boundaries, extensive enough to reconstruct the causal sequence rather than only record the visible symptom. Instrument competing causes in the same pass when practical so one reproduction can distinguish them.
 
-   Run the reproduction automatically when the required inputs, app state, tools, credentials, and pass/fail signal are available to the agent; the action is non-destructive; and the agent can directly observe whether the reported symptom occurred.
+3. **Reproduce the instrumented issue.** Use the fastest deterministic signal that represents the reported symptom: focused test, script, browser test, trace replay, harness, repeat loop, profiler, app/device automation, or structured human reproduction. Run it when safe and observable. For intermittent failures, run enough repetitions to compare causes.
 
-   Ask the user to reproduce when the bug depends on inaccessible external state, a physical device or account the agent cannot access, private credentials, subjective interaction the agent cannot observe, a tool install or permission the user has not approved, or a real-world action that could be destructive, costly, or privacy-sensitive.
+   When reproduction requires inaccessible state, credentials, devices, subjective interaction, or risky actions, first prepare the capture, exact steps, expected observation, and artifact to inspect. Ask the user to reproduce and reply `done`; confirm the returned evidence matches the reported failure.
 
-   When user reproduction is required, prepare everything needed to receive useful evidence before asking: add targeted instrumentation if allowed, start the relevant log/trace/screenshot collection, provide exact repro steps, name the expected observation, and identify the artifact paths or command output the agent will inspect. Then ask the user to reproduce the issue and reply `done` when finished reproducing it. Do not claim the bug is reproduced or fixed until the user-provided logs, screenshots, traces, or observations confirm the same failure mode.
+4. **Collect and analyze.** Collect the complete output, correlate events across boundaries, compare it with each prediction, and record evidence for and against every cause. If the logs are incomplete or ambiguous, identify how the likely areas or instrumentation must change before another reproduction.
 
-   After a user-driven reproduction confirms the issue, convert it into an agent-runnable loop or regression test when practical. If that is not practical, state the remaining manual verification requirement explicitly.
+5. **Determine confidence.** Rank each cause by role (root, contributing, or alternative), `0-100%` confidence, supporting and conflicting evidence, and the next evidence that could change its score or rank. Treat scores as calibrated judgments, not statistical probabilities. Assign 100% operational confidence only when:
 
-2. Reproduce the actual bug.
-   Confirm the loop shows the same failure mode the user reported, not a nearby error. For flakes, raise the reproduction rate enough to debug.
+   - the exact symptom is reproduced
+   - the causal chain from trigger to failure is observed
+   - controlling the suspected boundary reliably controls the symptom
+   - the cause or combination of causes explains every relevant observation
+   - plausible alternatives are falsified or included as contributing causes
+   - intermittent behavior is repeated enough to distinguish causality from coincidence
 
-3. Form falsifiable hypotheses.
-   Generate 3-5 plausible causes with predictions. Show them to the user when the next step is expensive, high-risk, destructive, blocked on access, or the user explicitly asked for diagnosis before edits. Otherwise proceed with the strongest probe.
+   If proof is incomplete, choose the safest practical probe likely to add discriminating evidence and state which results would raise, lower, or redistribute confidence. Revise the likely areas or instrumentation and repeat the loop only while such a probe exists; do not repeat an equivalent pass without changing its inputs, boundary, or instrumentation.
 
-4. Instrument one boundary at a time.
-   Prefer debugger/REPL inspection, then targeted logs or metrics. Probe the boundary that distinguishes hypotheses, not the visible symptom. If evidence is still not decisive, add a narrower probe before fixing.
+   Stop as incomplete when no available probe should increase confidence, a pass adds no evidence and no distinct boundary remains, or the needed evidence requires unavailable access, user action, unacceptable risk, or disproportionate effort. Never label an incomplete diagnosis as proven.
 
-5. Make the smallest credible fix.
-   Fix the proven fault line. Do not stack speculative fixes. Revert failed experiments unless they are independently useful and intentionally kept.
+## Output
 
-6. Add regression coverage at the right seam.
-   The test should exercise the real bug pattern as it occurs at the call site. If no correct seam exists, say so instead of adding a shallow test that gives false confidence.
+Lead with one status:
 
-7. Verify with the original loop.
-   Re-run the original reproduction path, then the focused regression test, then broader checks only when the touched surface warrants them.
+- **Proven — 100%:** every applicable cause meets the proof standard with no unresolved plausible alternative.
+- **Incomplete:** the proof standard is not met.
 
-8. Account for temporary work.
-   Keep diagnostic logs while diagnosis is ongoing. Remove them only when the user asks for cleanup or they become intentional durable diagnostics. If committing while logs remain, stage only the fix/test/product changes and leave temporary diagnostics unstaged.
+For **Proven**, report each cause, role, causal chain, decisive evidence, exact code or runtime boundary, and interaction between causes. For **Incomplete**, rank candidates with confidence, supporting and conflicting evidence, remaining uncertainty, why the loop stopped, and the smallest evidence needed to continue. Always name the validation signal that preserves the causal evidence.
+
+## Temporary Diagnostics
+
+Keep diagnostic logs until the user requests cleanup or they become durable diagnostics. If committing while temporary diagnostics remain, stage only intended durable changes and report what remains unstaged.
 
 ## Delegation
 
-Only use subagents when the user explicitly asks for delegation, subagents, parallel work, or token-optimized execution.
+Use subagents only when the user explicitly requests delegation, subagents, parallel work, or token optimization. Delegate bounded mechanical collection to faster or cheaper agents: known commands or repro loops, logs, screenshots, traces, profiles, extraction, or artifact comparison. Give each task a success condition, output format, runtime boundary, and no-edit instruction unless mutation is explicit.
 
-When delegation is allowed, delegate mechanical evidence collection and bounded extraction work to faster or cheaper low-reasoning subagents: running known browser/app/device/CLI commands, collecting logs, screenshots, snapshots, traces, profiler artifacts, running known repro loops or focused tests, extracting relevant log lines, summarizing large artifacts, or comparing before/after outputs.
-
-Keep the main agent responsible for the reasoning-heavy path: choosing the feedback loop, deciding where and what to log, forming and ranking hypotheses, choosing the boundary to instrument, interpreting ambiguous evidence, editing code, and making the final diagnosis.
-
-Do not delegate the next blocking step, ambiguous diagnosis, fix selection, implementation, or overlapping file edits. Do not ask subagents to "analyze what to fix" unless the task is explicitly read-only advice and the main agent will independently verify the evidence before acting.
-
-Before launching subagents, give each one a narrow success condition, explicit artifact/output format, and a bounded command set or runtime. Prefer several small extraction jobs over one broad investigation. Tell subagents not to edit files, stage, commit, install packages, or run long builds unless that mutation is the explicit delegated task.
-
-After delegated work returns or is interrupted, check the working tree and relevant background processes before continuing. If a subagent made unexpected changes, do not assume they are wrong or revert them blindly; inspect the diff, identify ownership, and ask or preserve them when they may belong to another concurrent agent.
-
-Ask delegated agents to return compact evidence with command outcomes, artifact paths, file references, and exact relevant errors instead of full raw logs.
-
-## Stop Rules
-
-Stop and ask for user input when:
-
-- no credible feedback loop can be built from available code, tools, or artifacts
-- the bug depends on inaccessible external state
-- the next action is destructive or would transmit sensitive data
-- the user explicitly requested read-only diagnosis and the next step would edit files
-
-When blocked, report what was tried, what is still unknown, and the smallest artifact or access needed next.
+Keep feedback-loop design, hypothesis ranking, confidence scoring, ambiguous interpretation, and the final diagnosis in the main thread. Verify delegated evidence and inspect the working tree and background processes before continuing.
