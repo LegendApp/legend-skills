@@ -8,14 +8,14 @@ Legend Skills gives coding agents proven workflows in two groups:
 
 | Skill | Useful for |
 | --- | --- |
-| [`diagnose`](#diagnose) | Proving the root cause of unclear, intermittent, platform-specific, or performance bugs before editing. |
-| [`diagnose-fix-loop`](#diagnose-fix-loop) | Repeatedly diagnosing, fixing, and verifying until no useful evidence-backed improvement remains. |
-| [`commit`](#commit) | Turning a mixed working tree into clean, focused commits that follow repository conventions. |
-| [`commit-confirm`](#commit-confirm) | Reviewing proposed commit groups and messages before anything is staged or committed. |
-| [`git-conflicts`](#git-conflicts) | Safely resolving or continuing rebases, merges, cherry-picks, and reverts. |
-| [`react-coding-style`](#react-coding-style) | Building React, React Native, and TypeScript UI with narrow render boundaries and stable data flow. |
-| [`legend-list-best-practices`](#legend-list-best-practices) | Building or auditing fast virtualized lists with correct measurement, recycling, and row invalidation. |
-| [`legend-state-best-practices`](#legend-state-best-practices) | Designing observable state with clear ownership, fine-grained subscriptions, persistence, and sync. |
+| [diagnose](#diagnose) | Proving the root cause of unclear, intermittent, platform-specific, or performance bugs before editing. |
+| [diagnose-fix-loop](#diagnose-fix-loop) | Repeatedly diagnosing, fixing, and verifying until no useful evidence-backed improvement remains. |
+| [commit](#commit) | Turning a mixed working tree into clean, focused commits that follow repository conventions. |
+| [commit-confirm](#commit-confirm) | Reviewing proposed commit groups and messages before anything is staged or committed. |
+| [git-conflicts](#git-conflicts) | Safely resolving or continuing rebases, merges, cherry-picks, and reverts. |
+| [react-coding-style](#react-coding-style) | Building React, React Native, and TypeScript UI with narrow render boundaries and stable data flow. |
+| [legend-list-best-practices](#legend-list-best-practices) | Building or auditing fast virtualized lists with correct measurement, recycling, and row invalidation. |
+| [legend-state-best-practices](#legend-state-best-practices) | Designing observable state with clear ownership, fine-grained subscriptions, persistence, and sync. |
 
 Use one skill for a focused task or combine workflow and domain skills so the agent knows both *how to work* and *which technical contracts to protect*.
 
