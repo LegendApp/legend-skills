@@ -18,34 +18,33 @@ elif [[ -f "$(git rev-parse --git-path REVERT_HEAD)" ]]; then
 fi
 
 if [[ -n "$operation" ]]; then
-    echo "Active operation: $operation"
+    printf 'Active operation: %s\n' "$operation"
 else
-    echo "No rebase, merge, cherry-pick, or revert in progress."
+    printf 'No rebase, merge, cherry-pick, or revert in progress.\n'
 fi
 
 conflicted=()
-while IFS= read -r line; do
-    conflicted+=("$line")
-done < <(git diff --name-only --diff-filter=U)
+while IFS= read -r -d '' file; do
+    conflicted+=("$file")
+done < <(git diff --name-only --diff-filter=U -z)
 
 if [[ ${#conflicted[@]} -eq 0 ]]; then
-    echo "No conflicted files."
+    printf 'No conflicted files.\n'
     exit 0
 fi
 
-echo "Conflicted files (${#conflicted[@]}):"
+printf 'Conflicted files (%d):\n' "${#conflicted[@]}"
 for file in "${conflicted[@]}"; do
-    echo " - $file"
+    printf ' - %q\n' "$file"
 done
 
-echo
-echo "Conflict marker locations:"
+printf '\nConflict marker locations:\n'
 for file in "${conflicted[@]}"; do
-    echo "==> $file"
+    printf '==> %q\n' "$file"
     if command -v rg >/dev/null 2>&1; then
-        rg -n "^(<<<<<<<|=======|>>>>>>>)" "$file" || true
+        rg -n -- "^(<<<<<<<|=======|>>>>>>>)" "$file" || true
     else
-        grep -nE "^(<<<<<<<|=======|>>>>>>>)" "$file" || true
+        grep -nE -- "^(<<<<<<<|=======|>>>>>>>)" "$file" || true
     fi
-    echo
+    printf '\n'
 done

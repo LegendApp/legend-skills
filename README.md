@@ -122,7 +122,7 @@ $diagnose-fix-loop to reduce the Profile screen's load time
 
 ### `git-conflicts`
 
-Detects an active rebase, merge, cherry-pick, or revert before starting new work, resolves only unambiguous conflicts, continues the correct Git operation, and escalates behavioral conflicts with concrete options.
+Detects an active rebase, merge, cherry-pick, or revert before starting new work. If the operation or intended resolution is not 100% clear, it stops before editing, staging, or continuing and asks for guidance with concrete options.
 
 Use it for branch integration or when Git is already stopped in a conflict and you want to avoid destructive recovery commands or incorrect `ours`/`theirs` assumptions.
 

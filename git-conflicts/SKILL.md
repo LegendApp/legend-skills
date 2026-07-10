@@ -1,109 +1,48 @@
 ---
 name: git-conflicts
-description: Recover active Git sequencer operations and run requested branch-integration commands safely. Use when asked to run a rebase, merge a branch, cherry-pick or revert a commit, continue an interrupted operation, fix conflicts during rebasing, or resolve conflicts from an in-progress merge, cherry-pick, or revert. First detect whether a Git operation is already in progress and continue that operation before asking for a target branch.
+description: Recover active Git sequencer operations and run requested branch integration safely. Use for rebases, merges, cherry-picks, reverts, interrupted operations, conflict resolution, ours/theirs interpretation, or deciding when user guidance is required. Detect active Git state first and never guess an unclear operation or resolution.
 ---
 
 # Git Conflicts
 
-Recover active Git conflict operations first. If no operation is active, run
-the branch-integration operation the user requested. Default to rebase only
-when the user did not request merge, cherry-pick, or revert.
+> **Hard stop:** Proceed only when the operation, target, and intended result of every conflict are 100% clear from Git state, explicit user intent, and repository evidence. Otherwise stop before editing, staging, continuing, skipping, aborting, or starting an operation, and ask the user. Never choose a default; an incorrect resolution is worse than an interruption.
 
 ## Workflow
 
-1. Check repo and operation state.
-Use:
-- `git status --short --branch`
-- `git rev-parse --abbrev-ref HEAD`
-- `git rev-parse --git-path rebase-merge`
-- `git rev-parse --git-path rebase-apply`
-- `git rev-parse --git-path MERGE_HEAD`
-- `git rev-parse --git-path CHERRY_PICK_HEAD`
-- `git rev-parse --git-path REVERT_HEAD`
+1. **Inspect state.** Run full `git status`, `git status --short --branch`, and `scripts/inspect-conflicts.sh` when available. Resolve `rebase-merge`, `rebase-apply`, `MERGE_HEAD`, `CHERRY_PICK_HEAD`, and `REVERT_HEAD` with `git rev-parse --git-path`.
 
-2. If any operation is active, continue that operation.
-Do not ask what to rebase onto. Treat `git status` and the Git state files as
-the source of truth, even when the user says "rebase" but Git is actually in a
-merge, cherry-pick, or revert.
+   Active Git state determines the operation to resume; do not start another. It does not determine the intended combined behavior. Before starting a new operation, identify pre-existing staged, unstaged, and untracked changes; ask if their ownership or interaction is unclear.
 
-3. If no operation is active, identify the requested operation.
-Follow explicit user intent:
-- rebase: rebase the current branch onto the requested target branch
-- merge: merge the requested branch or commit
-- cherry-pick: cherry-pick the requested commit(s)
-- revert: revert the requested commit(s)
+2. **Confirm a new operation.** With no active operation, require an explicit method and target: rebase onto a target, merge a target, cherry-pick commits, or revert commits. Ask if the method, target, commit set or order, or merge-commit mainline is missing or ambiguous. Do not default to rebase. Fetch only the required remote or ref when freshness matters.
 
-If the user did not specify an operation, default to rebase. If the needed
-branch or commit is missing, ask for it before making changes.
+   Start the confirmed operation non-interactively with `git rebase <target>`, `git merge --no-edit <target>`, `git cherry-pick <commits>`, or `GIT_EDITOR=true git revert <commits>`. Add `-m <parent>` only for a confirmed merge-commit mainline.
 
-4. Start the requested operation.
-Use:
-- `git fetch --all --prune` if remote updates matter for branch targets
-- `git rebase <target-branch>`
-- `git merge <branch-or-commit>`
-- `git cherry-pick <commit>...`
-- `git revert <commit>...`
+3. **Inspect every conflict before editing.** Check `git diff --name-only --diff-filter=U`, markers or index stages, and the exact change represented by `REBASE_HEAD`, `CHERRY_PICK_HEAD`, `REVERT_HEAD`, or `MERGE_HEAD`. Use surrounding history, callers, tests, and docs to state the intended result and evidence for every path.
 
-5. If conflicts occur, inspect and classify.
-Use:
-- `git status --short`
-- `git diff --name-only --diff-filter=U`
-- `scripts/list-rebase-conflicts.sh` if present
+   If any result is not 100% clear, resolve nothing. Report the exact Git state and paths, explain the competing intents and evidence, and offer concrete options. You may identify the likeliest option but must not select it. Always ask for divergent behavior, unclear delete/modify conflicts, uncertain binary/lock/generated files, competing refactors or evidence, and missing mainline parents. Formatting, imports, non-overlapping edits, moves, and generated files are direct only when repository evidence verifies the result.
 
-6. Resolve straightforward conflicts directly, then stage files.
-Use:
-- edit files to remove markers and preserve correct combined behavior
-- `git add <file> ...`
+4. **Resolve and verify.** Treat staged resolutions, `rerere`, merge drivers, and automatic resolutions as untrusted proposals. Once every path is clear, edit the files, regenerate generated output from its source, remove all markers, and stage only resolved paths. Verify no unmerged entries remain, review `git diff --cached`, and run the fastest meaningful focused check when the intermediate state is testable. Never accept `ours`, `theirs`, union merge, or generated output wholesale without independent verification.
 
-7. Continue after each conflict batch with the active operation's command.
-Use:
-- rebase: `GIT_EDITOR=true git rebase --continue`
-- merge: `GIT_EDITOR=true git merge --continue`
-- cherry-pick: `GIT_EDITOR=true git cherry-pick --continue`
-- revert: `GIT_EDITOR=true git revert --continue`
-- repeat until complete
+5. **Continue the active operation.** Use the matching command:
 
-8. Validate and summarize.
-Use:
-- run relevant tests/lint if feasible
-- summarize which operation was started or continued, what was auto-resolved, and what required user input
+   - `GIT_EDITOR=true git rebase --continue`
+   - `GIT_EDITOR=true git merge --continue`
+   - `GIT_EDITOR=true git cherry-pick --continue`
+   - `GIT_EDITOR=true git revert --continue`
 
-## Conflict Policy
+   Reinspect state after every continuation and apply the same hard stop to each new conflict.
 
-Treat as straightforward only when intent is unambiguous:
-- trivial formatting/import ordering differences
-- non-overlapping line edits that can be merged without changing behavior
-- generated file conflicts where regeneration is deterministic and safe
+6. **Finish.** Run focused validation, then report the completed operation, resolved paths, validation, and remaining tree changes.
 
-Escalate to the user when any of these appear:
-- behavioral or product decision conflicts
-- both sides changed same logic in different ways
-- delete/modify conflicts where ownership is unclear
-- lockfile or generated artifact conflicts with uncertain source of truth
-- large refactors where preserving both sides is risky
+## Ours And Theirs
 
-When escalating, provide:
-1. file path(s)
-2. short description of each competing change
-3. concrete options and recommended default
+- Rebase: `ours` is the branch rebased onto; `theirs` is the commit being replayed.
+- Merge: `ours` is the current branch; `theirs` is the branch being merged.
+- Cherry-pick: `ours` is the current branch; `theirs` is the commit being applied.
+- Revert: infer nothing from the labels; compare current `HEAD`, the reverted commit, its selected parent, and the index stages.
 
-## Operation Safety Notes
+## Safety
 
-Identify the active operation before interpreting conflict sides:
-- during rebase, `--ours` is the branch being rebased onto and `--theirs` is the commit currently being replayed
-- during cherry-pick or revert, `--ours` is the current branch and `--theirs` is the picked or reverted commit
-- during merge, `--ours` is the current branch and `--theirs` is the branch being merged
+Never use destructive resets, abort an operation, skip commits, or overwrite unrelated changes without explicit approval. If completion is unclear or unsafe, preserve the exact state and ask whether to provide resolution guidance, use the matching `--abort`, or choose another integration strategy.
 
-Do not use destructive resets unless explicitly requested.
-Do not skip commits unless the user approves.
-
-If the operation cannot be completed safely, stop and ask whether to:
-1. continue with manual guidance
-2. abort the active operation with the matching `--abort` command
-3. apply a different strategy
-
-## Resources
-
-### scripts/list-rebase-conflicts.sh
-
-Print the active operation, conflicted files, and conflict marker locations for fast triage.
+`scripts/inspect-conflicts.sh` prints the active operation, conflicted files, and marker locations.
