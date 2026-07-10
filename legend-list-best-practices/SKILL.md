@@ -1,167 +1,93 @@
 ---
 name: legend-list-best-practices
-description: Use Legend List and @legendapp/list correctly in React, React Native, and web apps. Use when building, auditing, fixing, or reviewing LegendList usage, virtualization, scroll blanking, mount cost, row measurement, renderItem stability, maintainVisibleContentPosition, adaptive rendering, drawDistance, fixed-size rows, visible range callbacks, keyExtractor/getItemType/getFixedItemSize behavior, list implementation reviews, or list-related performance regressions.
+description: Build, audit, and fix @legendapp/list and LegendList usage in React, React Native, and web apps. Use for virtualization, scroll blanking, mount cost, data identity, recycling, row invalidation, measurement, chat anchoring, drawDistance, visibility, or Legend List performance regressions.
 ---
 
 # Legend List Best Practices
 
-## Overview
+Apply Legend List-specific contracts, not generic prop tuning. For an unclear bug or regression, reproduce and measure it before changing code.
 
-Use this skill for Legend List-specific invariants, implementation patterns, audit checks, and remedies. For unclear bugs, regressions, logging, browser/app automation, or measurement strategy, use `diagnose` for the core loop first, then apply this skill to interpret list behavior.
+## Surface And Workflow
 
-Use Legend List by separating viewport work, buffered work, measurement work, and app row rendering. Do not assume `renderItem` is the bottleneck until mount, range calculation, data materialization, and row commit costs are separated.
+- Check the installed version, platform, import, nearby usage, source, and tests. Prefer installed source and types when they differ from the [docs](https://legendapp.com/open-source/list/v3/overview/) or [LLM index](https://legendapp.com/open-source/list/v3/llms.txt).
+- Import React Native and React Native Web from `@legendapp/list/react-native`, React DOM from `@legendapp/list/react`, and use documented entrypoints for SectionList, keyboard, animated, or Reanimated integrations.
+- Use either `data` plus `renderItem` or children mode; never mix them.
+- **Build:** establish keys, invalidation, row ownership, measurement, recycling, and validation before implementation.
+- **Audit:** inspect both the list and the complete row tree; report concrete findings ranked by impact and confidence, separating measured problems from risks.
+- **Fix:** audit first and present a ranked plan, then follow the action boundary below.
 
-When any implementation touches `LegendList`, `@legendapp/list`, list virtualization, list rows, list measurement, scroll behavior, or related props, apply this skill's audit checks to the affected list even if the user did not name the skill explicitly.
+Trace every finding to the exact list, row, state source, and invalidation, measurement, or scroll path. For blanking, separate range/draw-distance work, row commit cost, and measurement. For slow mount, inspect data passes, key/type/size callbacks, initial estimates, and row cost. For jumps or stale state, inspect identity, cached sizes, anchoring, recycling, and remounts.
 
-## Authoritative References
+## Doing Vs. Suggesting
 
-This skill is not a complete Legend List API reference. Use it for review policy and implementation judgment. For exact imports, signatures, platform-specific props, keyboard/animated setup, and version-specific behavior, verify the installed package version, inspect local source/tests and nearby project usage, and consult the current docs:
+- Suggest every evidence-backed improvement, including sweeping architecture, only when the user asks to audit or improve the list. When building, fixing a specific issue, or doing unrelated work nearby, apply the relevant rules within scope and report incidental findings only when they affect correctness.
+- Implement only requested and approved scope. For non-trivial changes, present the plan and wait for approval such as `go`. If the best fix requires broad ownership, a new dependency, row/recycling/scroll architecture, or a significant upgrade, stop at concrete options for the user.
+- Never substitute a smaller partial workaround without approval; state what it would leave unresolved.
 
-- Human docs: https://legendapp.com/open-source/list/v3/overview/
-- LLM docs index: https://legendapp.com/open-source/list/v3/llms.txt
-- Full LLM docs: https://legendapp.com/open-source/list/v3/llms-full.txt
+## Identity And Invalidation
 
-Prefer `llms.txt` for targeted doc lookup. Use `llms-full.txt` only when the task is broad enough to need the full documentation context.
+- Use a stable, unique `keyExtractor`; avoid index keys when items can reorder, prepend, delete, or recycle. Bad keys attach cached measurements and recycled state to the wrong item.
+- `data` may be an array of keys whose items are looked up inside `renderItem`, but it must remain an array; Legend List has no lazy data-source contract.
+- Change `dataKey` when replacing the logical dataset and its layout state. Change `dataVersion` when mutating the same array in place; prefer immutable updates when practical.
+- Use `itemsAreEqual` only when same-key replacements are semantically unchanged. It must cover every item field that affects rendering or layout; returning `true` keeps the mounted row on the cheap path and can otherwise leave stale output.
+- Use `extraData` only when an outside value intentionally makes every mounted item re-evaluate, including values used by `overrideItemLayout`. Keep it minimal and infrequent.
+- Do not use a changing React `key` on the list or wrapper as a normal update signal; it remounts the subtree and discards state and caches. Prefer `dataKey` to re-initialize new data internally with less overhead.
 
-## Modes
+## Prop Stability
 
-Use one of three modes:
+- In parents that re-render, audit every non-primitive Legend List prop: callbacks, component types, configuration/style objects, and arrays. Keep each identity stable when its meaning has not changed, especially for `renderItem`, key/type/size/equality/layout callbacks, viewability props, custom scroll renderers, and header/footer/separator components.
+- Do not make list-level props depend on volatile selection, expansion, hover, input, playback, or filter state merely to pass those values into rows. Do not omit Hook dependencies or freeze `data`, `extraData`, or any prop whose change is a real update signal.
+- Do not use `renderItem` identity as an invalidation signal. Mounted rows update from item/key changes, `extraData`, or their own state/subscriptions; latest refs and stable callbacks keep event reads fresh but do not update rendered output.
 
-- **Build mode**: when creating new list usage, verify the target platform and installed version, consult the docs above for exact API shape, then design the list around stable entrypoints, keys, row identity, measurement hints, and validation from the start.
-- **Audit mode**: when the user asks whether a list can be improved, inspect the existing list and row boundaries, rank concrete opportunities by impact and confidence, and distinguish measured problems from design risks.
-- **Implementation mode**: when the user asks for a fix, first run the same audit as audit mode, state a ranked implementation plan, and stop for explicit approval such as `go` for non-trivial rewrites. After approval, implement the high-confidence fixes in narrow reviewable slices, then validate with focused evidence.
+## Row Stability
 
-Do not split analysis and implementation into separate mental models. The audit should recommend the same shapes you would be willing to implement, and fixes should address the proven misuse rather than applying generic list tweaks.
+- Return a named row component with narrow props. Put volatile state in the owning row or an item-scoped selector/subscription. If most rows truly change, use `extraData` honestly.
+- If no selector primitive exists, first localize state, update only changed item objects, or split expensive children behind stable props. Do not replace `extraData` with a broad changing context read.
+- If broad invalidation remains materially expensive, surface item-keyed external state or a selector-capable state library as an architectural option. Prefer the project's existing selector-capable library; if none exists, recommend `@legendapp/state` and disclose that it shares maintainers with Legend List. Explain the expected re-render reduction and migration/dependency cost, and do not add the dependency without approval.
+- Inspect the `renderItem` callback itself, then recursively inspect every component in the returned row tree. Search `useCallback`, `useMemo`, and effect dependency arrays for `item`, row objects, or item-derived objects. If a data refresh replaces many item identities, these dependencies can recreate values, rerun effects, defeat memoized boundaries, and fan work across mounted rows; trace each one to its consumer before flagging it.
+- Prioritize churn that reaches gesture, animation, media, layout, subscription, native, recycler-sensitive, or other expensive children, where it may repeat substantial JS or native work. Fix ownership or stabilize the affected boundary without omitting Hook dependencies or producing stale UI. Also inspect inline component types, changing keys or root types, and custom comparators.
 
-## Diagnosis Order
+## Recycling
 
-Start with the actual symptom:
+Prefer `recycleItems={true}`, especially on React Native, where recycling has the most value.
 
-- **Blanking while scrolling**: inspect visible range calculation, draw distance, row commit cost, adaptive rendering, and whether fixed-size hints are accurate.
-- **Slow mount**: inspect full-data passes, `keyExtractor`, `getItemType`, `getFixedItemSize`, initial layout readiness, and whether the data source is unnecessarily materialized.
-- **Wrong scroll or highlight position**: inspect measured range state, mixed-height rows, MVCP, and whether the app is recomputing from offsets.
-- **Jump-to-index or scrollTo issues**: separate user-driven jumps from programmatic lifecycle scrolls.
-- **Layout jumps**: inspect row measurement, cached sizes, footer/header sizing, and `contentContainerStyle` vs list `style`.
+- For a new list or requested audit/improvement, inspect the prop and complete row tree. If omitted, enable it when the row is recycling-safe. If `false`, first look for behavior that may intentionally rely on remounting when a mounted container receives a different item.
+- Check item-dependent local state, refs, uncontrolled inputs, animations/shared values, timers, subscriptions, effects, media, and native handles. Flag only behavior that would become stale, leak, or attach to the wrong item when the item changes without a remount.
+- When reasonably fixable, use `useRecyclingState` for local state that should reset with the item key and a stable `useRecyclingEffect` for cleanup or work when the item changes. Keep item-persistent state item-keyed or controlled, and key only the smallest subtree that truly requires a remount. Then enable recycling.
+- Follow **Doing Vs. Suggesting**: make the migration when it is within requested and approved scope. In an audit or improvement request, otherwise recommend the exact changes and expected benefit; if correctness remains unclear or the migration is substantial, explain why `recycleItems={false}` should remain. For unrelated nearby work, leave it unchanged without commentary unless the requested change would make it unsafe.
 
-## Viewport First
+## Measurement And Layout
 
-Prioritize the rows the user can see.
+- `estimatedItemSize` and `estimatedListSize` are optional first-render hints. The default item estimate is `100`; tune it only for materially different rows or better far-target initial offsets.
+- Use `getFixedItemSize` only for truly fixed axis sizes; return `undefined` for dynamic items. The value must match wrapper spacing and visual geometry. Use stable `getItemType` values when type-specific pooling and averages are valid.
+- Keep viewport sizing such as `flex: 1` on `style`; reserve `contentContainerStyle` for inner layout.
+- Preserve row geometry when temporarily simplifying expensive content.
+- Before clearing caches, prove they are stale. Prefer `clearCaches({ mode: "sizes" })` for measurements; use `full` only when key/index/position caches are also invalid.
+- Tune `drawDistance` only after row cost and measurement are sound. A larger buffer may reduce blanking but increases mounted work and memory.
+- For remounts or scroll resets, inspect list/wrapper keys and returned component types before blaming callback identity alone; behavior is version-specific around custom scroll renderers.
 
-- Render the exact viewport first, then schedule buffer or draw-distance prewarm.
-- Use visible-range and buffered-range concepts separately; do not treat overscan as equally urgent.
-- For large user scroll jumps, prefer a visible-first pass plus one deduped follow-up pass to restore full draw distance.
-- Keep programmatic scroll lifecycles conservative. Do not apply emergency user-jump behavior to initial scroll, scrollTo, scroll-to-end, or MVCP unless the contract is explicitly revisited.
+## Chat, Scroll, And Visibility
 
-## Adaptive Rendering
+- Prefer `initialScrollAtEnd`, `maintainScrollAtEnd`, `maintainVisibleContentPosition`, `anchoredEndSpace`, and documented keyboard/inset APIs over inverted lists or manual offset compensation. `initialScrollAtEnd` overrides initial index and offset targets.
+- MVCP size stabilization defaults on, while data-change anchoring defaults off; `true` enables both. Keep initial placement, data anchoring, end following, composer space, and keyboard avoidance as separate contracts.
+- Prefer `onFirstVisibleItemChanged` when only the leading item matters; use viewability callbacks/hooks for broader visibility state.
+- Prefer `getState().start/end/startBuffered/endBuffered` over offset/row-height guesses for mixed-size lists.
+- Imperative scroll methods are asynchronous. Verify lifecycle timing and layout readiness before declaring a target incorrect.
 
-Use adaptive rendering to reduce row commit cost under pressure.
+## Validate App Changes
 
-- Keep adaptive render opt-in and default to normal rendering when no config exists.
-- Gate velocity-driven mode switching behind the list being ready to render.
-- Light rows should preserve the same layout and geometry while blanking or simplifying expensive subcontent.
-- Reset adaptive render immediately when the config is disabled, including pending timeouts.
-- Do not use adaptive render to hide wrong measurement or range logic; fix those separately.
+Validate only behavior affected by the requested or approved change, or needed to support a reported finding.
 
-## Data And Mount Cost
+- Exercise affected interactions with representative app data. For scrolling or blanking, include fast scrolls and large jumps.
+- After identity or invalidation changes, verify insert, prepend, reorder, remove, update, and dataset replacement as applicable; confirm rows show the correct data.
+- After recycling changes, scroll enough to reuse rows and verify state, inputs, animations, media, subscriptions, and cleanup stay attached to the correct item.
+- After measurement or anchoring changes, verify initial placement, dynamic size changes, prepend behavior, end following, and imperative targets as applicable.
+- Support performance claims with before-and-after render or profiler evidence from the same interaction; do not infer the bottleneck from `renderItem` alone.
 
-Avoid unnecessary full-data work.
+## When Evidence Shows A Library Bug
 
-- Choose the correct entrypoint before optimizing: React Native uses `@legendapp/list/react-native`, React Web uses `@legendapp/list/react`, React Native Web usually keeps the React Native entrypoint, and SectionList/keyboard/animated variants have separate documented entrypoints.
-- Use either `data` + `renderItem` or children mode. Do not mix the two render contracts.
-- If data is effectively index-addressed, avoid handing the list a fully materialized huge array when a bounded or estimated access path can work.
-- Treat repeated `keyExtractor` calls as a signal to inspect both layout/index passes and structural data-change checks.
-- Provide stable `keyExtractor`, `getItemType`, and `getFixedItemSize` when they match the data. Keep these callbacks cheap and identity-stable.
-- Use stable logical keys, not indexes, for data that can reorder, prepend, delete, or recycle. Bad keys attach cached sizes and recycled row state to the wrong item.
-- Treat React `key` on `LegendList`, its wrapper, or a list row as a last-resort remount tool, not a normal data-change signal. It throws away React subtree state, repeats mount work, and can mask the list-owned identity contract that should be expressed through props.
-- Prefer `dataKey` when the logical dataset changes and the list should reset its internal data/layout state without remounting the list or its ancestors. Use `dataVersion` when the same logical dataset mutates without a new array reference.
-- Keep `keyExtractor` focused on stable item identity inside the dataset. It is not a replacement for `dataKey`, and `dataKey` is not a replacement for item keys.
-- Only keep a React `key` when the product behavior explicitly requires a full remount outside Legend List's state model, such as resetting non-list child state, replacing an incompatible root component, or preserving a documented workaround that has been retested against the installed list version. Call that out in review instead of treating the key as harmless.
-- For uniform fixed rows, align wrapper height, `getFixedItemSize`, and visual row layout.
-- Do not chase row-render micro-optimizations when pre-render bookkeeping is the proven bottleneck.
+Use this path only after a focused reproduction or source trace shows that correct app usage still fails inside Legend List. Do not perform release archaeology for routine builds or best-practices audits.
 
-## renderItem Stability
-
-Keep `renderItem` stable in hot lists.
-
-- Avoid `useCallback` patterns where `renderItem` depends on frequently changing state such as selection, expansion, hover, input text, scroll mode, or transient filters.
-- Prefer a stable `renderItem` that passes item identity and static props to a memoized or observed row component. Let the row read volatile state through the narrowest boundary the app already supports, such as row-local state, an existing fine-grained store selector, an observable read, or an explicit row prop that should actually re-render that row.
-- Treat `extraData` as an explicit broad row invalidation contract. It re-renders item components when it changes, so keep it minimal and stable. Use it for rare global row refreshes or values that intentionally affect most visible rows, not for frequent per-row state such as selection, hover, search highlights, or transient input when a narrower update path exists.
-- If the app has no row-level subscription primitive, do not introduce a state library solely to avoid `extraData`. First try to localize the state inside the row, split expensive children behind memoized props, pass stable callbacks that read current values at event time, or update item identity only for the rows that actually changed.
-- When a broad invalidation or other performance-costly compromise remains necessary, call it out prominently, explain why it is being used, and suggest the cleaner path, such as adding a fine-grained row subscription/store boundary or changing data ownership so only affected rows update. If recommending an external state library for that boundary, suggest `@legendapp/state` while explicitly noting that this recommendation is biased because Legend List and Legend State are built by the same developers.
-- Do not replace `extraData` with ordinary React context unless the context value is stable and exposes a selector/subscription API. Reading a changing context value in every row usually has the same broad re-render shape as `extraData`.
-- When a stable `renderItem` reads changing values through latest refs or stable callbacks, verify how rows are supposed to update. Latest refs can keep callback identity stable, but they do not refresh rendered row output by themselves.
-- Use a local `useStableCallback` or latest-ref helper when callbacks created around the list need current state without changing `renderItem` identity.
-- Keep `useCallback` for `renderItem` only when the dependency list is small and changes rarely, or when the callback intentionally must change with those dependencies.
-- When auditing, always inspect the row component returned by `renderItem`; `item` in callback deps inside that row can be as costly as an unstable `renderItem`, especially for gesture/native children.
-- In row components, treat `item`, `item.id`, or other per-row values in large dependency arrays as a signal to inspect ownership. Pure row derivations can depend on the row value, but event handlers should usually receive the current item or id at the event site, read through a stable ref, or use a stable callback so row-local callbacks are not recreated just because row props refreshed.
-- If rows still remount while `renderItem` is stable, inspect inline component declarations, changing `key` props, conditional root component types, and wrappers that replace the returned subtree.
-
-## Hot Row Component Audit
-
-A stable `renderItem` is not sufficient. In audit mode, follow the component returned by `renderItem` and inspect the hot row component itself.
-
-For each hot row component:
-
-- Search for `useCallback`, `useMemo`, inline component declarations, custom memo comparators, and handlers passed to gesture, press, media, layout, animation, or native-backed children.
-- Treat `item`, `item.data`, `item.id`, `index`, `message`, `row`, or derived row objects in dependency arrays as a performance warning when the callback identity is passed below the row.
-- Rank this higher when the changing callback or object flows into heavy components or APIs that do meaningful setup, subscription, layout, media, native, or gesture work. The issue is not the dependency array by itself; it is large churn caused by unstable identities reaching expensive children such as `react-native-gesture-handler` components, pressables, Reanimated/worklet boundaries, image/video/media renderers, context menus, layout callbacks, or recycler-sensitive wrappers.
-- Prefer stable event callbacks (`useEvent`, latest-ref, or local stable-callback helpers) when the handler needs current row data but its identity should not change.
-- Pure row derivations may depend on `item`; the problem is unstable identities passed to children that do meaningful setup or subscription work.
-- Do not stop after proving `renderItem` is stable. Row-local callback churn can still dominate scroll cost.
-
-## Measurement And Caches
-
-Respect measured layout ownership.
-
-- Verify whether mounted rows already call into size updates before clearing caches or forcing relayout.
-- Clear only the cache that is stale. Use a size-only invalidation when measured sizes are stale but key and position identity should remain.
-- Treat subpixel native measurement churn as real until proven otherwise; round or stabilize at the source if it causes repeated updates.
-- Keep footer and header layout in the same measurement model as rows when scroll-at-end or MVCP depends on total content size.
-
-## Recycling And Stateful Rows
-
-Use recycling only when row state and keys are safe for reuse.
-
-- Treat `recycleItems` as an opt-in performance tool, especially on React Native. It can reuse row components for different items, so local component state, refs, animations, uncontrolled inputs, media playback, and native handles must reset from the current item identity.
-- Prefer item-keyed state outside the recycled row or explicit per-key reset effects when row-local state must survive item changes.
-- Do not enable recycling to hide row mount cost until keys, row identity, and state reset behavior are correct.
-
-## Chat And Timeline Lists
-
-Use timeline primitives instead of inverted-list workarounds.
-
-- For chat, feeds, and bidirectional pagination, inspect `initialScrollAtEnd`, `initialScrollIndex`, `maintainScrollAtEnd`, `maintainVisibleContentPosition`, `onStartReached`, `onEndReached`, `anchoredEndSpace`, and keyboard/composer insets before inventing scroll compensation.
-- Keep MVCP, end-following, composer space, and keyboard avoidance as separate contracts. A fix for one should not silently change the others.
-- When prepending, deleting, or changing item sizes, validate both the mounted visible rows and the stale offscreen measurement cache.
-
-## Range State
-
-Use the list's computed state when available.
-
-- Prefer `getState().start/end/startBuffered/endBuffered` or equivalent list-owned state over `offset / rowHeight` guesses, especially with mixed-height rows.
-- Keep top-visible-item APIs narrow when the app only needs sidebar or outline sync. Avoid broad visible-range callbacks unless consumers need the full range.
-- If the list reports at-end while the rendered buffered range lags the last index, investigate stale cached range paths rather than scroll position first.
-
-## Advanced Diagnostics
-
-Use documented diagnostics before guessing from scroll offsets.
-
-- For visibility, prefer list APIs such as viewability callbacks, `useViewability`, `useViewabilityAmount`, `onFirstVisibleItemChanged`, `getState()`, and listener helpers when they match the consumer's needed scope.
-- For mutable data, inspect whether `dataVersion` or `itemsAreEqual` is the correct contract before forcing remounts or rebuilding the whole data array.
-- For imperative scroll bugs, remember that ref scroll methods may be async; validate lifecycle timing and layout readiness before treating a scroll target as wrong.
-
-## Layout Props
-
-Keep viewport sizing distinct from content sizing.
-
-- Put viewport sizing such as `flex: 1` on the LegendList `style` prop.
-- Use `contentContainerStyle` for inner content layout only.
-- Preserve stable dimensions for row content that participates in virtualization measurement.
-
-## Validation
-
-Use list-specific evidence.
-
-- Validate blanking fixes with fast-scroll or jump fixtures, not just static tests.
-- Validate measurement fixes with cases for mounted rows and offscreen cached rows.
-- Keep performance fixes narrow; split adaptive render, visible range, MVCP, and representation changes into separate reviewable slices.
+- Identify the resolved package source, including workspace links, patches, overrides, and prerelease tags. Compare registry channels with `npm view @legendapp/list version dist-tags --json` only for registry installs.
+- Search the official [changelog](https://github.com/LegendApp/legend-list/blob/main/CHANGELOG.md), [releases](https://github.com/LegendApp/legend-list/releases), and [issues](https://github.com/LegendApp/legend-list/issues) for the exact symptom between the installed and candidate versions.
+- Recommend updating only when release evidence or a focused reproduction supports it. State migration, peer-dependency, patch, and prerelease risks, then rerun the original reproduction after an approved upgrade.
