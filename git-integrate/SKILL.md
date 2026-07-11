@@ -1,9 +1,9 @@
 ---
-name: git-conflicts
+name: git-integrate
 description: Safely start new or continue in-progress Git integration and history operations through verified completion. Use when asked to run or resume a rebase, merge, cherry-pick, or revert; when Git is already in the middle of one of those operations; or for interruption recovery, conflict resolution, ours/theirs interpretation, and deciding when user guidance is required. Continue a detected active operation before considering new work, never choose the integration method, and never guess an unclear next action or resolution.
 ---
 
-# Git Conflicts
+# Git Integrate
 
 Own a rebase, merge, cherry-pick, or revert through verified completion. If one is already in progress, take it over and continue or repair it before considering new work. Otherwise, safely start the operation explicitly requested by the user. This is not a general Git command runner: do not choose an integration strategy or perform unrelated commit, branch, stash, reset, remote, or worktree maintenance.
 
@@ -11,7 +11,7 @@ Own a rebase, merge, cherry-pick, or revert through verified completion. If one 
 
 ## Workflow
 
-1. **Inspect state.** Run full `git status`, `git status --short --branch`, and `scripts/inspect-conflicts.sh` when available. Record the current branch and `HEAD`. Resolve `rebase-merge`, `rebase-apply`, `MERGE_HEAD`, `CHERRY_PICK_HEAD`, `REVERT_HEAD`, and the sequencer directory with `git rev-parse --git-path`.
+1. **Inspect state.** Run full `git status`, `git status --short --branch`, and `scripts/inspect-operation.sh` when available. Record the current branch and `HEAD`. Resolve `rebase-merge`, `rebase-apply`, `MERGE_HEAD`, `CHERRY_PICK_HEAD`, `REVERT_HEAD`, and the sequencer directory with `git rev-parse --git-path`.
 
    Active Git state determines the operation to continue; do not start another or ask the user to choose a new method or target. It does not by itself establish the intended combined behavior or prove that `--continue` is the correct immediate action.
 
@@ -60,4 +60,4 @@ Own a rebase, merge, cherry-pick, or revert through verified completion. If one 
 
 Never use destructive resets, abort or quit an operation, skip or drop commits, overwrite unrelated changes, or change the requested history topology without explicit approval. If completion is unclear or unsafe, preserve the exact state and ask whether to provide resolution guidance, use the matching recovery command, or choose another integration strategy.
 
-`scripts/inspect-conflicts.sh` prints the active operation, current branch and commit, operation metadata, staged and conflicted paths, index stages, and marker locations.
+`scripts/inspect-operation.sh` prints the active operation, current branch and commit, operation metadata, staged and conflicted paths, index stages, and marker locations.

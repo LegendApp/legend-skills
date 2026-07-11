@@ -13,7 +13,7 @@ Legend Skills gives coding agents focused workflows in two groups:
 | [commit-confirm](#commit-confirm) | Reviewing how all working-tree changes will be grouped before anything is committed. |
 | [diagnose](#diagnose) | Proving the root cause of unclear, intermittent, platform-specific, or performance bugs before editing. |
 | [diagnose-fix-loop](#diagnose-fix-loop) | Repeatedly diagnosing, fixing, and verifying until no useful evidence-backed improvement remains. |
-| [git-conflicts](#git-conflicts) | Safely starting or continuing rebases, merges, cherry-picks, and reverts through completion. |
+| [git-integrate](#git-integrate) | Safely starting or continuing rebases, merges, cherry-picks, and reverts through completion. |
 | [legend-list-best-practices](#legend-list-best-practices) | Building or auditing fast virtualized lists with correct measurement, recycling, and row invalidation. |
 | [legend-state-best-practices](#legend-state-best-practices) | Designing observable state with clear ownership, fine-grained subscriptions, persistence, and sync. |
 | [react-coding-style](#react-coding-style) | Building React, React Native, and TypeScript UI with narrow render boundaries and stable data flow. |
@@ -60,7 +60,7 @@ npx skills add LegendApp/legend-skills --skill commit
 npx skills add LegendApp/legend-skills --skill commit --skill commit-confirm
 npx skills add LegendApp/legend-skills --skill diagnose
 npx skills add LegendApp/legend-skills --skill diagnose --skill diagnose-fix-loop
-npx skills add LegendApp/legend-skills --skill git-conflicts
+npx skills add LegendApp/legend-skills --skill git-integrate
 npx skills add LegendApp/legend-skills --skill legend-list-best-practices
 npx skills add LegendApp/legend-skills --skill legend-state-best-practices
 npx skills add LegendApp/legend-skills --skill react-coding-style
@@ -136,7 +136,7 @@ Use it when you want the agent to keep working through a bug or performance prob
 $diagnose-fix-loop to reduce the Profile screen's load time
 ```
 
-### git-conflicts
+### git-integrate
 
 Safely starts a requested rebase, merge, cherry-pick, or revert, or takes over one already in progress and continues it through verified completion. Active operations always come first; the skill does not ask for a new method or target when Git state already identifies them. It stops for guidance only when the next action, history shape, or intended resolution is not clear. It does not choose the integration strategy or act as a general Git command runner.
 
@@ -145,13 +145,13 @@ Use it for new branch integration, a normal continuation step, or when Git is pa
 To start a rebase:
 
 ```text
-$git-conflicts rebase on main
+$git-integrate rebase on main
 ```
 
 To continue or repair an in-progress operation:
 
 ```text
-$git-conflicts
+$git-integrate
 ```
 
 ### legend-list-best-practices
