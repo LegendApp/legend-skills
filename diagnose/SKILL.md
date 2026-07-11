@@ -25,9 +25,22 @@ Load only what applies:
 
 2. **Instrument before reproducing.** Load [instrumentation.md](references/instrumentation.md) and add structured logging across the relevant boundaries, extensive enough to reconstruct the causal sequence rather than only record the visible symptom. Instrument competing causes in the same pass when practical so one reproduction can distinguish them.
 
+   Before reproducing, define the probe contract:
+
+   - the exact trigger and visible symptom
+   - the questions this run will answer
+   - each candidate cause's distinguishing prediction
+   - the events, fields, and correlation IDs that test those predictions
+   - how the evidence will be tied to the exact visible failure
+   - the intended process, build, window, document, and runtime identity when applicable
+
+   Do not run the reproduction if the probes cannot distinguish the leading candidates or cannot confirm that the exact symptom occurred.
+
 3. **Reproduce the instrumented issue.** Use the fastest deterministic signal that represents the reported symptom: focused test, script, browser test, trace replay, harness, repeat loop, profiler, app/device automation, or structured human reproduction. Run it when safe and observable. For intermittent failures, run enough repetitions to compare causes.
 
    When reproduction requires inaccessible state, credentials, devices, subjective interaction, or risky actions, first prepare the capture, exact steps, expected observation, and artifact to inspect. Ask the user to reproduce and reply `done`; confirm the returned evidence matches the reported failure.
+
+   If the user corrects the trigger, affected component, lifecycle, or visible symptom, invalidate evidence and probes that target the previous interpretation. Return to cause location and instrumentation before reproducing again; do not continue with a nearby but mismatched reproduction.
 
 4. **Collect and analyze.** Collect the complete output, correlate events across boundaries, compare it with each prediction, and record evidence for and against every cause. If the logs are incomplete or ambiguous, identify how the likely areas or instrumentation must change before another reproduction.
 
