@@ -1,9 +1,11 @@
 ---
 name: diagnose
-description: Evidence-first causal diagnosis for bugs, browser or app/device failures, flaky behavior, and performance regressions. Use to locate likely causes, instrument relevant boundaries with extensive structured logging, reproduce the issue, analyze the collected logs, rank causes with confidence scores, and pursue 100% operational confidence while probes can increase confidence.
+description: Opt-in evidence-first causal diagnosis for bugs, browser or app/device failures, flaky behavior, and performance regressions. Activate only when the user explicitly invokes `$diagnose` or explicitly asks to use the named diagnose skill. Do not activate merely because the user mentions a bug, asks why something failed, requests debugging or a fix, or describes unexpected behavior. Once explicitly invoked, locate likely causes, instrument relevant boundaries with extensive structured logging, reproduce the issue, analyze the collected logs, rank causes with confidence scores, and pursue 100% operational confidence while probes can increase confidence.
 ---
 
 # Diagnose
+
+Use this workflow only after the explicit opt-in described in the frontmatter. A normal bug report or debugging request does not opt in to this skill.
 
 Find and explain the cause of a symptom with 100% operational confidence.
 
