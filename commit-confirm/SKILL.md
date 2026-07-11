@@ -1,9 +1,11 @@
 ---
 name: commit-confirm
-description: Approval-first, whole-working-tree wrapper for the commit skill. Defaults to grouping all changes and requires the commit skill; selected installs must also install commit. Use when the user asks to commit with confirmation, review all changes first, propose commits, wait for "go", or ask before committing.
+description: Opt-in approval-first, whole-working-tree wrapper for the commit skill. Defaults to grouping all changes and requires the commit skill; selected installs must also install commit. Activate only when the user explicitly invokes `$commit-confirm` or explicitly asks to use the named commit-confirm skill. Do not activate merely because the user asks to review or propose commits, ask before committing, or wait for "go".
 ---
 
 # Commit Confirm
+
+Use this wrapper only after the explicit opt-in described in the frontmatter. A normal approval-first commit request does not opt in to this skill or its whole-working-tree default.
 
 Use this skill to run `$commit` in approval-first mode, defaulting to the whole working tree.
 

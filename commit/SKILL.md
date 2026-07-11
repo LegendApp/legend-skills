@@ -38,7 +38,7 @@ If a file contains unrelated changes, split by hunk with `git add -p` or another
 
 ## Message Style
 
-Follow repository guidance when present. Otherwise use this default:
+Follow explicit user instructions and repository or workspace guidance when present; they override this skill's defaults. Otherwise use this default:
 
 - Conventional Commit `type: subject`
 - no scope parentheses
