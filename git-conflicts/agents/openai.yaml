@@ -1,4 +1,4 @@
 interface:
   display_name: "Git Conflicts"
-  short_description: "Resolve git conflicts without guessing"
-  default_prompt: "Use $git-conflicts to detect active Git state, run or resume only the confirmed operation, and stop for my guidance before any resolution or operation that is not 100% clear."
+  short_description: "Start or continue Git operations safely"
+  default_prompt: "Use $git-conflicts to safely start my requested Git integration operation or continue the one already in progress, then verify its final history."
