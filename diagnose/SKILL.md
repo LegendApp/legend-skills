@@ -9,7 +9,9 @@ Use this workflow only after the explicit opt-in described in the frontmatter. A
 
 Find and explain the cause of a symptom with 100% operational confidence.
 
-Start from the user's concrete anchor: file, route, error, log, screen, branch, artifact, or reproduction step. Consult relevant architecture notes, ADRs, glossaries, and test docs. Inspect code, run safe tools or tests, and analyze existing artifacts. Add behavior-neutral instrumentation only with approval.
+Start from the user's concrete anchor: file, route, error, log, screen, branch, artifact, or reproduction step. Consult relevant architecture notes, ADRs, glossaries, and test docs. Inspect code, run safe tools or tests, and analyze existing artifacts.
+
+Explicit invocation of Diagnose constitutes approval for behavior-neutral temporary instrumentation within the requested scope. Ask separately only for risky actions, inaccessible-state reproduction, or mutations that affect product behavior or external systems.
 
 ## References
 

@@ -12,6 +12,7 @@ Use this skill to turn the requested changes into one or more clean commits with
 - **Default:** commit only changes made by the current agent in the current task. Determine ownership from the known starting state, conversation, and tool history; do not infer it merely from the current diff or file path.
 - **All changes:** inspect and commit the whole working tree only when the user explicitly asks to commit all, everything, or the whole tree.
 - **Explicit subset:** honor any files, hunks, commits, or exclusions named by the user.
+- **Temporary artifacts:** exclude investigation-only diagnostics, logs, traces, profiler output, experimental toggles, screenshots, and repro fixtures unless explicitly requested. Keep permanent regression tests; ask if unclear.
 - If change ownership or the requested boundary cannot be determined reliably, stop before staging and ask. Never include pre-existing, concurrent, or user-authored changes by guesswork.
 
 ## Approval Modes
@@ -24,11 +25,12 @@ Use this skill to turn the requested changes into one or more clean commits with
 ## Inspect
 
 1. Read repository guidance first: `AGENTS.md`, contribution docs, or visible commit conventions.
-2. Inspect state with `git status -sb`, `git diff --stat`, `git diff --staged --stat`, and targeted `git diff` / `git diff --staged`. Inspect relevant untracked files before staging them.
-3. Classify staged, unstaged, and untracked changes as in or out of scope. Treat the full tree as context, not as permission to commit it.
-4. Preserve out-of-scope staged changes. If scoped changes occupy fully owned paths, a path-limited commit may leave unrelated index entries intact; if scoped and unrelated hunks share a path or safe isolation is uncertain, stop and ask rather than unstaging or committing someone else's work.
-5. Respect explicit exclusions, such as debug logs or generated artifacts the user said not to commit. Leave excluded changes unstaged and report them afterward.
-6. If there are no in-scope changes, say so and report any remaining out-of-scope changes without committing them.
+2. Determine whether the work fixes a known GitHub issue from explicit user context, an approved issue/task document, a verified issue URL, or repository metadata. Do not infer an issue relationship from an incidental number alone.
+3. Inspect state with `git status -sb`, `git diff --stat`, `git diff --staged --stat`, and targeted `git diff` / `git diff --staged`. Inspect relevant untracked files before staging them.
+4. Classify staged, unstaged, and untracked changes as in or out of scope. Task ownership does not imply inclusion; classify task-created instrumentation and fixtures as permanent or temporary before staging. Treat the full tree as context, not as permission to commit it.
+5. Preserve out-of-scope staged changes. If scoped changes occupy fully owned paths, a path-limited commit may leave unrelated index entries intact; if scoped and unrelated hunks share a path or safe isolation is uncertain, stop and ask rather than unstaging or committing someone else's work.
+6. Respect explicit exclusions, such as debug logs or generated artifacts the user said not to commit. Leave excluded changes unstaged and report them afterward.
+7. If there are no in-scope changes, say so and report any remaining out-of-scope changes without committing them.
 
 ## Group
 
@@ -45,11 +47,15 @@ Follow explicit user instructions and repository or workspace guidance when pres
 - imperative, concrete subject
 - no trailing period
 - no `Co-authored-by` trailer unless the user explicitly asks
+- when the commit fixes a verified GitHub issue, append ` #<number>` to the end of the subject
+
+Use the issue suffix only when the commit is intended to fix that issue, not merely when it is related or discovered during investigation. For multiple explicitly fixed issues, append each verified reference at the end. Repository-specific message rules or explicit user instructions still take precedence.
 
 Good:
 
 ```text
 fix: preserve scroll offset after prepend
+fix: preserve failed CRUD creates #547
 feat: add commit planning skill
 docs: document skills install flow
 ```
@@ -61,6 +67,8 @@ fix(list): preserve scroll offset
 update stuff
 chore: misc.
 ```
+
+When the work explicitly fixes issue #547, `fix: preserve failed CRUD creates` is also incomplete because it omits the verified issue suffix.
 
 Use a body for behavioral changes when the reason, invariant, or validation would not be obvious from the title.
 
