@@ -17,6 +17,7 @@ Legend Skills gives coding agents focused workflows in two groups:
 | [legend-list-best-practices](#legend-list-best-practices) | Building or auditing fast virtualized lists with correct measurement, recycling, and row invalidation. |
 | [legend-state-best-practices](#legend-state-best-practices) | Designing observable state with clear ownership, fine-grained subscriptions, persistence, and sync. |
 | [react-coding-style](#react-coding-style) | Building React, React Native, and TypeScript UI with narrow render boundaries and stable data flow. |
+| [simplify](#simplify) | Keeping every change tight, clear, performant, and free of unnecessary concepts. |
 
 Use one skill for a focused task or combine workflow and domain skills so the agent knows both *how to work* and *which technical contracts to protect*.
 
@@ -64,6 +65,7 @@ npx skills add LegendApp/legend-skills --skill git-integrate
 npx skills add LegendApp/legend-skills --skill legend-list-best-practices
 npx skills add LegendApp/legend-skills --skill legend-state-best-practices
 npx skills add LegendApp/legend-skills --skill react-coding-style
+npx skills add LegendApp/legend-skills --skill simplify
 ```
 
 ## Skill dependencies
@@ -187,4 +189,14 @@ Use it for maximizing React performance. It helps reduce render work without tra
 ```text
 Use $react-coding-style to refactor this settings panel so changing one field does
 not re-render every section. Preserve behavior and verify the new render boundaries.
+```
+
+### simplify
+
+Keeps code, tests, documentation, configuration, and other changes as tight, clear, performant, and minimal as possible without weakening behavior. It prefers existing ownership and direct implementation over speculative abstractions, duplicated state, fallbacks, and runtime work.
+
+Use it during implementation or afterward to tighten existing work. It will often apply automatically when an agent makes changes.
+
+```text
+Use $simplify to tighten this change without altering its behavior.
 ```
