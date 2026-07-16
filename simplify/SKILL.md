@@ -1,16 +1,22 @@
 ---
 name: simplify
-description: Keep code, tests, documentation, configuration, and other changes as tight, clear, performant, and minimal as possible without weakening behavior. Use whenever implementing or modifying repository content, and when asked to simplify, tighten, clean up, reduce verbosity, remove complexity, or minimize existing work.
+description: Keep code, tests, documentation, configuration, and other changes as tight, clear, performant, and minimal as possible without weakening behavior. Use during implementation to prevent unnecessary complexity, after behavior is proven to consolidate working changes, before handoff for a full branch audit, and when asked to simplify, tighten, clean up, reduce verbosity, remove complexity, or minimize existing work.
 ---
 
 # Simplify
 
 Produce the smallest clear implementation that fully satisfies the required behavior. Minimize concepts and moving parts, not line count.
 
+## Cadence
+
+- During construction, apply the priorities locally while discovering behavior. Allow clearly temporary instrumentation or scaffolding when it accelerates learning.
+- At convergence, once a logical behavior slice passes, simplify that slice, remove superseded attempts, and rerun focused validation.
+- Before handoff or merge, compare the full branch with its merge base and reconcile code, tests, comments, documentation, configuration, and relevant history.
+
 ## Workflow
 
 1. Identify the required behavior, invariants, constraints, and non-goals.
-2. For existing work, compare the final diff with its merge base and separate it into logical concepts. Check history for superseded attempts when relevant.
+2. Inspect the relevant diff and separate it into logical concepts. For a final branch audit, compare the full branch with its merge base and check history for superseded attempts when relevant.
 3. Inspect the existing owners, sources of truth, common path, and decision points before adding anything.
 4. Choose the design with the fewest necessary concepts and the least work at runtime.
 5. When changes are requested, implement directly and reuse existing mechanisms where they fit.
