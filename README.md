@@ -2,8 +2,8 @@
 
 Legend Skills gives coding agents focused workflows in two groups:
 
-1. **Legend library skills** for building fast, correct apps with Legend List and Legend State
-2. **General React and React Native development skills** for debugging difficult issues, fixing them completely, protecting Git history, and high-performance React and React Native apps.
+1. **Legend library skills** for building fast, correct apps with Legend List and Legend State.
+2. **General development skills** for evidence-first debugging, complete fix loops, safe Git changes, minimal implementation, and high-performance React and React Native apps.
 
 ## Skills at a glance
 
@@ -17,7 +17,7 @@ Legend Skills gives coding agents focused workflows in two groups:
 | [legend-list-best-practices](#legend-list-best-practices) | Building or auditing fast virtualized lists with correct measurement, recycling, and row invalidation. |
 | [legend-state-best-practices](#legend-state-best-practices) | Designing observable state with clear ownership, fine-grained subscriptions, persistence, and sync. |
 | [react-coding-style](#react-coding-style) | Building React, React Native, and TypeScript UI with narrow render boundaries and stable data flow. |
-| [simplify](#simplify) | Keeping every change tight, clear, performant, and free of unnecessary concepts. |
+| [simplify](#simplify) | Preventing unnecessary complexity during implementation and tightening finished changes before handoff. |
 
 Use one skill for a focused task or combine workflow and domain skills so the agent knows both *how to work* and *which technical contracts to protect*.
 
@@ -193,10 +193,19 @@ not re-render every section. Preserve behavior and verify the new render boundar
 
 ### simplify
 
-Keeps code, tests, documentation, configuration, and other changes as tight, clear, performant, and minimal as possible without weakening behavior. It prefers existing ownership and direct implementation over speculative abstractions, duplicated state, fallbacks, and runtime work.
+Keeps code, tests, documentation, configuration, and other changes as tight, clear, performant, and minimal as possible without weakening behavior. It minimizes concepts and moving parts rather than line count, preferring existing ownership and direct implementation over speculative abstractions, duplicated state, fallbacks, and runtime work.
 
-Use it during implementation or afterward to tighten existing work. It will often apply automatically when an agent makes changes.
+Use it throughout a change: locally during construction, after a behavior slice passes to consolidate working attempts, and before handoff or merge to audit the full branch against its merge base. It preserves temporary instrumentation while it is still useful, then removes superseded paths and reruns relevant validation once the behavior is proven.
 
 ```text
 Use $simplify to tighten this change without altering its behavior.
 ```
+
+```text
+Use $simplify to audit this branch before handoff and remove any superseded
+attempts without weakening behavior or validation.
+```
+
+## License
+
+[MIT](LICENSE)
