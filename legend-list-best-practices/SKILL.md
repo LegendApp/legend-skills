@@ -36,6 +36,7 @@ Trace every finding to the exact list, row, state source, and invalidation, meas
 ## Prop Stability
 
 - In parents that re-render, audit every non-primitive Legend List prop: callbacks, component types, configuration/style objects, and arrays. Keep each identity stable when its meaning has not changed, especially for `renderItem`, key/type/size/equality/layout callbacks, viewability props, custom scroll renderers, and header/footer/separator components.
+- Keep `extraData` itself a stable value, such as a `useMemo`: composing it inline, e.g. `extraData={{ ...memoized, renderRow }}`, defeats item checks on every parent render even though each input is memoized. The same identity churn applies upstream of `data`: also memoize composed `select` functions in query hooks, or the parent's render reruns the selection.
 - Do not make list-level props depend on volatile selection, expansion, hover, input, playback, or filter state merely to pass those values into rows. Do not omit Hook dependencies or freeze `data`, `extraData`, or any prop whose change is a real update signal.
 - Do not use `renderItem` identity as an invalidation signal. Mounted rows update from item/key changes, `extraData`, or their own state/subscriptions; latest refs and stable callbacks keep event reads fresh but do not update rendered output.
 
