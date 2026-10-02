@@ -1,6 +1,6 @@
 ---
 name: legend-list-best-practices
-description: Build, audit, and fix @legendapp/list and LegendList usage in React, React Native, and web apps. Use for virtualization, scroll blanking, mount cost, data identity, recycling, row invalidation, measurement, chat anchoring, drawDistance, visibility, or Legend List performance regressions.
+description: "Implement or audit @legendapp/list usage, including recycling, measurement, invalidation, and scroll anchoring."
 ---
 
 # Legend List Best Practices
@@ -21,7 +21,7 @@ Trace every finding to the exact list, row, state source, and invalidation, meas
 ## Doing Vs. Suggesting
 
 - Suggest every evidence-backed improvement, including sweeping architecture, only when the user asks to audit or improve the list. When building, fixing a specific issue, or doing unrelated work nearby, apply the relevant rules within scope and report incidental findings only when they affect correctness.
-- Implement only requested and approved scope. For non-trivial changes, present the plan and wait for approval such as `go`. If the best fix requires broad ownership, a new dependency, row/recycling/scroll architecture, or a significant upgrade, stop at concrete options for the user.
+- Implement the requested scope using authorization already given in the conversation. Continue local fixes and verification without another `go`. Ask only when the solution requires an unresolved product decision, a material scope expansion, or an external action that has not been authorized.
 - Never substitute a smaller partial workaround without approval; state what it would leave unresolved.
 
 ## Identity And Invalidation
@@ -47,15 +47,11 @@ Trace every finding to the exact list, row, state source, and invalidation, meas
 - If broad invalidation remains materially expensive, surface item-keyed external state or a selector-capable state library as an architectural option. Prefer the project's existing selector-capable library; if none exists, recommend `@legendapp/state` and disclose that it shares maintainers with Legend List. Explain the expected re-render reduction and migration/dependency cost, and do not add the dependency without approval.
 - Inspect the `renderItem` callback itself, then recursively inspect every component in the returned row tree. Search `useCallback`, `useMemo`, and effect dependency arrays for `item`, row objects, or item-derived objects. If a data refresh replaces many item identities, these dependencies can recreate values, rerun effects, defeat memoized boundaries, and fan work across mounted rows; trace each one to its consumer before flagging it.
 - Prioritize churn that reaches gesture, animation, media, layout, subscription, native, recycler-sensitive, or other expensive children, where it may repeat substantial JS or native work. Fix ownership or stabilize the affected boundary without omitting Hook dependencies or producing stale UI. Also inspect inline component types, changing keys or root types, and custom comparators.
+- Do not use DOM structural selectors such as `:first-child`, `:last-child`, or `:nth-child` to represent data position. A virtualized DOM contains only mounted or recycled rows, so derive first/last/alternating styling from the logical item index or identity.
 
 ## Recycling
 
-Prefer `recycleItems={true}`, especially on React Native, where recycling has the most value.
-
-- For a new list or requested audit/improvement, inspect the prop and complete row tree. If omitted, enable it when the row is recycling-safe. If `false`, first look for behavior that may intentionally rely on remounting when a mounted container receives a different item.
-- Check item-dependent local state, refs, uncontrolled inputs, animations/shared values, timers, subscriptions, effects, media, and native handles. Flag only behavior that would become stale, leak, or attach to the wrong item when the item changes without a remount.
-- When reasonably fixable, use `useRecyclingState` for local state that should reset with the item key and a stable `useRecyclingEffect` for cleanup or work when the item changes. Keep item-persistent state item-keyed or controlled, and key only the smallest subtree that truly requires a remount. Then enable recycling.
-- Follow **Doing Vs. Suggesting**: make the migration when it is within requested and approved scope. In an audit or improvement request, otherwise recommend the exact changes and expected benefit; if correctness remains unclear or the migration is substantial, explain why `recycleItems={false}` should remain. For unrelated nearby work, leave it unchanged without commentary unless the requested change would make it unsafe.
+For new lists, recycling changes, or a requested recycling audit, read [recycling.md](references/recycling.md).
 
 ## Measurement And Layout
 
@@ -68,11 +64,7 @@ Prefer `recycleItems={true}`, especially on React Native, where recycling has th
 
 ## Chat, Scroll, And Visibility
 
-- Prefer `initialScrollAtEnd`, `maintainScrollAtEnd`, `maintainVisibleContentPosition`, `anchoredEndSpace`, and documented keyboard/inset APIs over inverted lists or manual offset compensation. `initialScrollAtEnd` overrides initial index and offset targets.
-- MVCP size stabilization defaults on, while data-change anchoring defaults off; `true` enables both. Keep initial placement, data anchoring, end following, composer space, and keyboard avoidance as separate contracts.
-- Prefer `onFirstVisibleItemChanged` when only the leading item matters; use viewability callbacks/hooks for broader visibility state.
-- Prefer `getState().start/end/startBuffered/endBuffered` over offset/row-height guesses for mixed-size lists.
-- Imperative scroll methods are asynchronous. Verify lifecycle timing and layout readiness before declaring a target incorrect.
+For chat anchoring, imperative scrolling, or viewability changes, read [scroll-and-visibility.md](references/scroll-and-visibility.md).
 
 ## Validate App Changes
 
@@ -81,6 +73,7 @@ Validate only behavior affected by the requested or approved change, or needed t
 - Exercise affected interactions with representative app data. For scrolling or blanking, include fast scrolls and large jumps.
 - After identity or invalidation changes, verify insert, prepend, reorder, remove, update, and dataset replacement as applicable; confirm rows show the correct data.
 - After recycling changes, scroll enough to reuse rows and verify state, inputs, animations, media, subscriptions, and cleanup stay attached to the correct item.
+- Exercise stateful and derived row surfaces after reuse, including remote images, expansion, optimistic controls, and first/last styling when present. Verify filter or dataset resets clear any coupled external scroll state.
 - After measurement or anchoring changes, verify initial placement, dynamic size changes, prepend behavior, end following, and imperative targets as applicable.
 - Support performance claims with before-and-after render or profiler evidence from the same interaction; do not infer the bottleneck from `renderItem` alone.
 

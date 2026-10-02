@@ -1,6 +1,6 @@
 ---
 name: legend-state-best-practices
-description: Build, audit, and fix @legendapp/state usage in React, React Native, and TypeScript. Use for observable ownership, useValue selectors, observer and reactive components, fine-grained subscriptions, effects, persistence and sync, settings or session stores, deprecated use$ or useSelector migration, and reducing re-renders in hot paths.
+description: "Implement or audit @legendapp/state ownership, subscriptions, persistence, and sync."
 ---
 
 # Legend State Best Practices
@@ -24,7 +24,7 @@ This skill is policy, not an API reference. Prefer the installed version's sourc
 
 - **Build:** choose observable ownership, render subscriptions, effects, persistence or sync boundaries, and validation before writing code.
 - **Audit:** inspect ownership, subscription breadth, non-reactive reads, React-to-observable mirrors, effects, persistence, and hot paths; report only concrete findings, ranked by impact and confidence.
-- **Fix:** run the same audit and state a ranked plan. Before a non-trivial ownership, persistence, or broad render change, wait for explicit approval such as `go`; after approval, change the proven misuse in reviewable slices and verify the affected subscriptions and behavior. Stop when the correct model requires a product decision or materially larger scope.
+- **Fix:** inspect the relevant ownership and subscription path, then implement and verify within the scope already authorized by the conversation. Ask only for an unresolved product decision, materially larger scope, or an unauthorized external action.
 
 For audits, trace each finding from the mutation source through the tracked read to the component or effect that updates. Do not label an observable read broad or expensive without identifying the subscribers it wakes and the rendered value they consume.
 
@@ -73,15 +73,7 @@ Do not use effects to synchronize local owners or dispatch work that can run at 
 
 ## Persistence And Sync
 
-- Put complete defaults in the observable's initial value or the sync plugin's documented `initial` option when backward compatibility permits.
-- Normalize and validate persisted data at the persistence boundary so render consumers receive one local shape.
-- Preserve literal types with `const` generics or explicit store types when helpers would widen settings values.
-- Use `synced(...)` or a synced plugin when sync is part of the observable's definition; pass it to `observable` or `useObservable`. It activates lazily on the first `get()`.
-- Use `syncObservable(value$, options)` to attach sync or persistence to an existing observable; it starts when called.
-- Use `configureSynced` to create reusable defaults for `synced` or a sync plugin, and `syncState(value$)` to access load and sync status or controls.
-- Prefer built-in transforms, retry, `waitFor`, and persistence plugins over hand-written load/save effects.
-- Test migration behavior before removing runtime default merging from existing persisted stores.
-- Keep public export and type coverage when changing Legend State itself.
+For persistence or sync changes, read [persistence-and-sync.md](references/persistence-and-sync.md).
 
 ## Lists And Hot Paths
 
