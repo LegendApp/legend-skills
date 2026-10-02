@@ -1,6 +1,6 @@
 ---
 name: commit
-description: Commit the current agent's changes by default, or all working-tree changes when explicitly requested, with clean logical grouping and repository commit-message conventions. Use when the user asks to commit changes, commit this work, commit all changes, split changes into commits, propose commit messages, or wait for "go" before committing.
+description: "Commit the requested task changes, or plan their commits when review is requested. Include the whole tree only when explicitly asked."
 ---
 
 # Commit
@@ -49,26 +49,23 @@ Follow explicit user instructions and repository or workspace guidance when pres
 - no `Co-authored-by` trailer unless the user explicitly asks
 - when the commit fixes a verified GitHub issue, append ` #<number>` to the end of the subject
 
+Before accepting a subject:
+
+- Name the concrete behavior and target using terminology visible in the diff, such as a function, API, type, or user-facing effect.
+- Prefer naming the affected symbols or types over inventing an umbrella phrase. Make the subject searchable in `git log`.
+- Reject a subject that could plausibly describe several unrelated diffs. Ask: "Would this explain what changed without opening the diff?"
+- Avoid vague abstractions such as `improve behavior`, `update handling`, or `compare collection values` when the specific change can be named.
+
 Use the issue suffix only when the commit is intended to fix that issue, not merely when it is related or discovered during investigation. For multiple explicitly fixed issues, append each verified reference at the end. Repository-specific message rules or explicit user instructions still take precedence.
 
-Good:
+Examples:
 
 ```text
 fix: preserve scroll offset after prepend
 fix: preserve failed CRUD creates #547
-feat: add commit planning skill
-docs: document skills install flow
 ```
 
-Avoid:
-
-```text
-fix(list): preserve scroll offset
-update stuff
-chore: misc.
-```
-
-When the work explicitly fixes issue #547, `fix: preserve failed CRUD creates` is also incomplete because it omits the verified issue suffix.
+Avoid scoped subjects (`fix(list): ...`) and vague summaries (`update stuff`).
 
 Use a body for behavioral changes when the reason, invariant, or validation would not be obvious from the title.
 

@@ -1,4 +1,7 @@
 interface:
   display_name: "Diagnose"
   short_description: "Prove causes with evidence"
-  default_prompt: "Use $diagnose to locate likely causes, instrument the relevant boundaries with extensive structured logging, reproduce the issue, analyze the logs, and repeat while another probe can increase confidence."
+  default_prompt: "Use $diagnose to investigate the cause using existing evidence, add targeted probes when needed, and repeat only while another practical probe can change the conclusion."
+
+policy:
+  allow_implicit_invocation: false

@@ -2,3 +2,6 @@ interface:
   display_name: "Commit Confirm"
   short_description: "Review all changes; requires commit"
   default_prompt: "Use $commit-confirm to inspect the whole working tree, propose logical commit groups, and wait for go before staging or committing; requires $commit."
+
+policy:
+  allow_implicit_invocation: false

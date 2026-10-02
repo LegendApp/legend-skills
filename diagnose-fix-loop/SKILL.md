@@ -1,6 +1,6 @@
 ---
 name: diagnose-fix-loop
-description: Iterative diagnose-and-fix workflow that repeatedly uses the diagnose skill to find a proven problem, plan the smallest credible improvement, implement it, re-diagnose, and continue until no useful fix remains or user intervention is required. Requires the diagnose skill; selected installs must also install diagnose. Use when asked to keep debugging, fix and verify, iterate until satisfied, improve after diagnosis, or run a diagnosis/fix/verification loop.
+description: "Use only when explicitly asked to run diagnose-fix-loop: repeat diagnosis, scoped fixes, and verification."
 ---
 
 # Diagnose Fix Loop
@@ -9,7 +9,7 @@ Use this skill to drive a complete improvement loop, not a single debugging pass
 
 Before starting, load and follow `$diagnose`. Treat `$diagnose` as the evidence engine for each pass; this skill only adds the outer loop that plans, implements, re-runs diagnosis, and decides whether to continue.
 
-This skill owns planning and implementation after `$diagnose` proves the cause.
+Explicit invocation opts in to `$diagnose` and authorizes scoped local fixes and verification. This skill owns implementation once evidence supports a credible cause and fix.
 
 Selected installs do not install dependencies automatically. If `$diagnose` is not installed or available, stop before making changes. Tell the user to install it with:
 
@@ -25,7 +25,7 @@ Then ask them to retry after installation.
    Anchor the loop to the user's symptom, performance goal, failing test, UX defect, regression, or code quality concern. If the user gave no concrete anchor, create the fastest observable feedback loop first.
 
 2. Run a `$diagnose` pass.
-   Complete the evidence loop and record the exact validation signal that will be re-run after the fix. Proceed only when `$diagnose` reports **Proven — 100%**. If it reports **Incomplete**, stop and report the missing evidence.
+   Record the causal evidence and exact validation signal to rerun after the fix. Proceed on **Proven** or **Supported** evidence that justifies a scoped fix. If evidence remains **Incomplete**, continue useful available probes; stop when unavailable evidence prevents a credible fix, and report the gap.
    If the user asked for delegation, use it only for bounded evidence collection inside this pass; keep bottleneck ranking, fix selection, code edits, and final interpretation in the main loop.
 
 3. Make a ranked fix plan.
@@ -36,7 +36,7 @@ Then ask them to retry after installation.
    - what would make the plan wrong
 
 4. Implement only the top plan item.
-   Keep the edit scoped to the proven fault line. Avoid stacking speculative cleanup, broad refactors, or adjacent improvements unless the diagnosis showed they are part of the same fault.
+   Keep the edit scoped to the supported causal boundary. Avoid stacking speculative cleanup, broad refactors, or adjacent improvements unless the diagnosis showed they are part of the same fault.
 
 5. Verify with the original signal.
    Re-run the reproduction path or measurement from step 2, then focused regression coverage, then broader checks when the touched surface warrants them.

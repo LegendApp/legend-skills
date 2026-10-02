@@ -1,6 +1,6 @@
 ---
 name: simplify
-description: Keep code, tests, documentation, configuration, and other changes as tight, clear, performant, and minimal as possible without weakening behavior. Use during implementation to prevent unnecessary complexity, after behavior is proven to consolidate working changes, before handoff for a full branch audit, and when asked to simplify, tighten, clean up, reduce verbosity, remove complexity, or minimize existing work.
+description: "Simplify the requested code or diff while preserving behavior and meaningful coverage."
 ---
 
 # Simplify
@@ -11,7 +11,7 @@ Produce the smallest clear implementation that fully satisfies the required beha
 
 - During construction, apply the priorities locally while discovering behavior. Allow clearly temporary instrumentation or scaffolding when it accelerates learning.
 - At convergence, once a logical behavior slice passes, simplify that slice, remove superseded attempts, and rerun focused validation.
-- Before handoff or merge, compare the full branch with its merge base and reconcile code, tests, comments, documentation, configuration, and relevant history.
+- For an explicitly requested branch audit, compare with the intended base. Otherwise review only the requested change; do not broaden a small cleanup into a whole-branch audit.
 
 ## Workflow
 
