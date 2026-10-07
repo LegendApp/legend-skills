@@ -18,6 +18,7 @@ Legend Skills gives coding agents focused workflows in two groups:
 | [legend-state-best-practices](#legend-state-best-practices) | Designing observable state with clear ownership, fine-grained subscriptions, persistence, and sync. |
 | [react-coding-style](#react-coding-style) | Building React, React Native, and TypeScript UI with narrow render boundaries and stable data flow. |
 | [simplify](#simplify) | Preventing unnecessary complexity during implementation and tightening finished changes before handoff. |
+| [video-recording](#video-recording) | Recording app flows continuously and checking exported motion and source frame timing. |
 
 Use one skill for a focused task or combine workflow and domain skills so the agent knows both *how to work* and *which technical contracts to protect*.
 
@@ -66,6 +67,7 @@ npx skills add LegendApp/legend-skills --skill legend-list-best-practices
 npx skills add LegendApp/legend-skills --skill legend-state-best-practices
 npx skills add LegendApp/legend-skills --skill react-coding-style
 npx skills add LegendApp/legend-skills --skill simplify
+npx skills add LegendApp/legend-skills --skill video-recording
 ```
 
 ## Skill dependencies
@@ -204,6 +206,19 @@ Use $simplify to tighten this change without altering its behavior.
 ```text
 Use $simplify to audit this branch before handoff and remove any superseded
 attempts without weakening behavior or validation.
+```
+
+### video-recording
+
+Records the actual running app with a continuous recorder independent of UI
+automation, checks a short calibration before the full flow, and verifies the
+final export for stalls during expected motion. Includes a native macOS window
+recorder with source timestamp telemetry and a cross-platform video verifier.
+It preserves raw timing and requires visual review before calling a clip smooth.
+
+```text
+Use $video-recording to record the audience window while advancing through
+every slide transition, verify the exported motion, and show me the video.
 ```
 
 ## License

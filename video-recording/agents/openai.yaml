@@ -1,0 +1,4 @@
+interface:
+  display_name: "Video Recording"
+  short_description: "Record app videos and verify motion timing"
+  default_prompt: "Use $video-recording to record this app flow with continuous capture and verify the exported video before showing it."
