@@ -18,7 +18,7 @@ Explicit invocation of Diagnose constitutes approval for behavior-neutral tempor
 Load only what applies:
 
 - Browser or React web: [browser-react.md](references/browser-react.md)
-- iOS, Android, React Native, macOS, TV, or physical device: [app-device.md](references/app-device.md)
+- iOS, Android, React Native, macOS, TV, or physical device: [app-device.md](references/app-device.md). macOS app sessions default to agent-device's native backend; read its setup and XCTest fallback before opening the app.
 - Logs, runtime probes, metrics, or debug hooks: [instrumentation.md](references/instrumentation.md)
 
 ## Evidence Loop
