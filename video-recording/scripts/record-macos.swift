@@ -1,3 +1,4 @@
+import AppKit
 import AVFoundation
 import CoreGraphics
 import Darwin
@@ -284,6 +285,7 @@ func run(_ options: [String: String]) async throws -> Int32 {
 do {
     let options = try parseOptions()
     if #available(macOS 15.0, *) {
+        NSApplication.shared.setActivationPolicy(.prohibited)
         Task {
             do { exit(try await run(options)) }
             catch { emit(["type": "error", "message": String(describing: error)], to: .standardError); exit(2) }

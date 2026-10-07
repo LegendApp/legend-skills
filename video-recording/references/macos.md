@@ -44,6 +44,8 @@ tool request times. The ready signal and metadata expose the first frame's host
 timestamp; correlate interaction markers to the video timeline rather than
 assuming a key request happened at that exact frame. The stream may emit idle
 samples on static content. Low cadence while intentionally still is expected.
+Native output can end before the requested stop duration if the final content
+stays idle; check the exported duration and disclose omitted trailing still time.
 
 The entire selected window is captured, including any titlebar. If the requested
 delivery is content-only, crop a verified, fixed content rectangle afterward,
