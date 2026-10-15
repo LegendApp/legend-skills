@@ -46,6 +46,15 @@ Remove these when they serve no required behavior, invariant, useful clarity, me
 - try/catch blocks that swallow errors or silently fall back;
 - speculative generality: extension points or cases nothing uses yet.
 
+## Line-level pass
+
+- Read every added block with the existing code around it, not just the diff hunk.
+- Flag new code that duplicates a statement, return, or branch the surrounding code already has.
+- Flag cases where guarding, wrapping, or skipping existing code would be smaller than adding a parallel path.
+- Flag existing lines that became unreachable or redundant.
+- Report each case with the smaller rewrite; a diff-level "lean/proportional" verdict is not enough.
+- Example: a fast path `if (sortsAfterTail) { queue.push(task); return; }` before a scan loop that already ends with `queue.push(task)` duplicates the push. Guard the loop with `if (!sortsAfterTail)` so one trailing push serves both paths.
+
 ## Existing Work
 
 Establish a passing baseline before simplifying working code. Test one questionable concept at a time, rerun the relevant validation, and restore it if behavior or meaningful coverage weakens. Do not restructure several accumulated fix attempts before establishing which changes are causally necessary.
