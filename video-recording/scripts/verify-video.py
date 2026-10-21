@@ -101,8 +101,8 @@ def verify(args):
     if args.crop:
         filters.append(f"crop={args.crop[2]}:{args.crop[3]}:{args.crop[0]}:{args.crop[1]}")
     filters.append(f"freezedetect=n={args.noise_db}dB:d={args.freeze_ms / 1000}")
-    # Decode errors must fail even when ffmpeg could conceal them and finish.
-    detection = command(["ffmpeg", "-nostdin", "-hide_banner", "-v", "info", "-xerror",
+    # Preserve ffprobe's PTS origin; fail on decode errors even if ffmpeg could conceal them.
+    detection = command(["ffmpeg", "-nostdin", "-hide_banner", "-v", "info", "-xerror", "-copyts",
         "-i", str(args.video), "-map", "0:v:0", "-vf", ",".join(filters), "-an", "-f", "null", "-"])
     freezes = []
     start = None

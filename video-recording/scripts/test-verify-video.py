@@ -23,6 +23,7 @@ class VideoChecks(unittest.TestCase):
         ffmpeg("-i", str(cls.smooth), "-vf", "setpts=if(lt(N\\,60)\\,N\\,N+30)/60/TB",
                "-fps_mode", "cfr", *encode, str(cls.root / "stalled.mp4"))
         ffmpeg("-i", str(cls.smooth), "-vf", "tpad=stop_mode=clone:stop_duration=1", *encode, str(cls.root / "static-tail.mp4"))
+        ffmpeg("-itsoffset", "2", "-i", str(cls.root / "static-tail.mp4"), "-c", "copy", str(cls.root / "shifted-static-tail.mp4"))
         ffmpeg("-i", str(cls.smooth), "-vf", "select=not(between(t\\,1\\,1.5))",
                "-fps_mode", "vfr", *encode, str(cls.root / "gappy.mp4"))
 
@@ -59,6 +60,10 @@ class VideoChecks(unittest.TestCase):
     def test_intentional_static_tail_is_ignored_outside_motion(self):
         self.check_video("static-tail.mp4", "--motion", "0.1:2.9")
         self.check_video("static-tail.mp4", "--motion", "3.1:3.9", code=1)
+
+    def test_nonzero_start_preserves_freeze_timing(self):
+        self.check_video("shifted-static-tail.mp4", "--motion", "0.1:2.9")
+        self.check_video("shifted-static-tail.mp4", "--motion", "3.1:3.9", code=1)
 
     def test_vfr_capture_gap_fails(self):
         result = self.check_video("gappy.mp4", "--motion", "0.1:2.9", code=1)
