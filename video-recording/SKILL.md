@@ -64,3 +64,5 @@ Embed or link the final video. Briefly report duration, actual cadence evidence
 and limitations, requested flow coverage, edits, and sizable intermediates.
 If recording is blocked, deliver the exact blocker and prepared command or flow
 instead of presenting still captures as a faithful video.
+
+Run regression checks from this skill directory: `python3 scripts/test-macos-lifecycle.py` (macOS) and `python3 scripts/test-verify-video.py`.
