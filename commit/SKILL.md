@@ -91,6 +91,6 @@ For each group:
 1. Stage only that group using path-limited or hunk-limited staging. Do not silently unstage out-of-scope changes.
 2. Verify the intended commit contains only that group with `git diff --staged --stat`, targeted `git diff --staged`, and `git diff --staged --check`. When unrelated index entries remain, use a path-limited commit only for fully owned paths and verify those paths separately.
 3. Commit with the agreed message.
-4. Re-check the tree after hooks run, then continue to the next group.
+4. Re-check the tree after hooks run, then continue to the next group; if a pre-commit hook runs checks broader than the repo's documented scoped checks, use the repo's documented way to scope or skip it and say so.
 
 After all commits, report commit hashes and any remaining unstaged files. If a commit fails, stop and report the exact failure and the current git state.
