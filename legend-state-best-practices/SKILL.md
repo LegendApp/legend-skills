@@ -87,5 +87,5 @@ For persistence or sync changes, read [persistence-and-sync.md](references/persi
 - Test that only intended components update when a selector or reactive boundary changes.
 - Test tracked, non-tracked, and shallow reads when core tracking semantics change.
 - Test defaults, normalization, pending changes, retry, and metadata behavior for persistence or sync changes.
-- Run typecheck and export-surface tests for public package changes.
+- For public package changes, run typecheck and export-surface tests for the changed package.
 - Use profiler or render-count evidence for performance claims; a smaller-looking component is not proof of fewer renders.
